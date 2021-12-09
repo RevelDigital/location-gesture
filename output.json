@@ -1,0 +1,22 @@
+{
+    "device":{
+      "type":"gesture",
+      "name":"camera_gesture_sensor",
+      "model":"abc",
+      "id":123,
+      "firmware_version":1.0
+    },
+    "event":{
+      "type":"sensor_reading",
+      "data":{
+        "payload":[
+          {
+            "name":"",
+            "value":"",
+            "speed":0,
+            "target":{}
+          }
+        ]
+      }
+    }
+  }
