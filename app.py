@@ -19,15 +19,17 @@ setup_file = json_to_dict(r'SETUP.json')
 
 #opens serial port on default 9600,8,N,1 no timeout
 ser = serial.Serial(setup_file["portLocation"])
-print("Serial port being used: ")
-print(ser.name) #prints the port that is really being used
+print("Serial port being used: " + str(ser.name)) #prints the port that is really being used
+if(setup_file["serialOutput"] == "True"):
+    print("Serial Output: ON")
+else:
+    print("Serial Output: OFF")
 print("Thumb up for PLAY")
 print("Index up for PAUSE")
 
-
 # initialize mediapipe
 mpHands     = mp.solutions.hands            # hands = mpHands(x1, y1, x2, y2)
-hands       = mpHands.Hands(max_num_hands=1, min_detection_confidence=0.7) #more handssssssssssss
+hands       = mpHands.Hands(max_num_hands=1, min_detection_confidence=0.7) #more hands
 mpDraw      = mp.solutions.drawing_utils    # draw on the image
 
 # Load class names
@@ -214,10 +216,6 @@ while True:
         avx_list.pop(0)
         avy_list.pop(0)
     
-    # draw lines based on the average x and y
-    #for i in range(len(avx_list)):
-        #cv2.line(frame, (int(avx_list[i]*1.3), int(avy_list[i]*0.8)), (int(avx_list[i-1]*1.3), int(avy_list[i-1]*0.8)), (0, 0, 255), 1)
-    
     # if the hand is in the frame
     if  len(avx_list) > 1:
 
@@ -230,23 +228,34 @@ while True:
 
         if (avg_palm_x > 200 and avg_palm_x < int(width-200)):
             cv2.putText(frame, '0',  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
+            if(setup_file["serialOutput"] == "True"):
+                ser.write(b'0')
         elif (avg_palm_x > 40 and avg_palm_x < 200):
             cv2.putText(frame, '-1',  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
+            if(setup_file["serialOutput"] == "True"):
+                ser.write(b'-1')
         elif (avg_palm_x < 40):
             cv2.putText(frame, '-2',  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
+            if(setup_file["serialOutput"] == "True"):
+                ser.write(b'-2')
         elif (avg_palm_x > int(width-200) and avg_palm_x < int(width-40)):
             cv2.putText(frame, '1',  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
+            if(setup_file["serialOutput"] == "True"):
+                ser.write(b'1')
         elif (avg_palm_x > int(width-40)):
             cv2.putText(frame, '2',  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
+            if(setup_file["serialOutput"] == "True"):
+                ser.write(b'2')
         elif (len(avx_list) > 1):
             cv2.putText(frame, 'Hand not Found',  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
         #elif (avg_palm_x > 200 and avg_palm_x < int(width-200) and str(thumbRaised)==True):
             #cv2.putText(frame, 'PLAY' + str(thumbRaised),  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
+            #if(setup_file["serialOutput"] == "True"):
+                #ser.write(b'play')
         #elif (avg_palm_x > 200 and avg_palm_x < int(width-200) and str(indexRaised)==True):
             #cv2.putText(frame, 'PAUSE' + str(indexRaised),  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
-
-            
-        
+            #if(setup_file["serialOutput"] == "True"):
+                #ser.write(b'pause')
 
         #if the hand is not held
         if(setup_file["mouseControl"] == "True"):
