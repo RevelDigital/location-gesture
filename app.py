@@ -210,7 +210,7 @@ while True:
                 
                 index += 1
             
-            #get range of x and y
+            #get range of x and y, for use in calculating the hand's size
             x_range = max(landmarks, key=lambda x: x[0])[0] - min(landmarks, key=lambda x: x[0])[0]
             y_range = max(landmarks, key=lambda x: x[1])[1] - min(landmarks, key=lambda x: x[1])[1]
 
@@ -281,9 +281,13 @@ while True:
         if(setup_file["serialOutput"] == "True"):
             ser.write(b'%d' % quadrent)
 
-        #show hand size
-        cv2.putText(frame, 'size: ' + str(x_range+y_range),  (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
+        #size of hand relative to screen
+        size = round((x_range+y_range)/(width+height), 2)
         
+        #show hand size
+        cv2.putText(frame, 'size: ' + str(size),  (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
+        
+
         #if the quadrent is 3 ask if thumb is raised
         # if(quadrent == 3):
         #     if(thumbRaised):
