@@ -210,6 +210,10 @@ while True:
                 
                 index += 1
             
+            #get range of x and y
+            x_range = max(landmarks, key=lambda x: x[0])[0] - min(landmarks, key=lambda x: x[0])[0]
+            y_range = max(landmarks, key=lambda x: x[1])[1] - min(landmarks, key=lambda x: x[1])[1]
+
             # average of all the hand
             avx, avy                    = round(avx / len(handslms.landmark), 1), round(avy / len(handslms.landmark), 1)
             #average of the hand in relation to the palm
@@ -277,6 +281,9 @@ while True:
         if(setup_file["serialOutput"] == "True"):
             ser.write(b'%d' % quadrent)
 
+        #show hand size
+        cv2.putText(frame, 'size: ' + str(x_range+y_range),  (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
+        
         #if the quadrent is 3 ask if thumb is raised
         # if(quadrent == 3):
         #     if(thumbRaised):
