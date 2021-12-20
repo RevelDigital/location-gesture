@@ -65,10 +65,43 @@ while True:
     width  = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
     height  = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
-    cv2.line(img=frame, pt1=(40, 40), pt2=(40, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
-    cv2.line(img=frame, pt1=(200, 40), pt2=(200, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
-    cv2.line(img=frame, pt1=(int(width-200), 40), pt2=(int(width-200), int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
-    cv2.line(img=frame, pt1=(int(width-40), 40), pt2=(int(width-40), int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
+    # half of frame width
+    half_width  = int(width/2)
+
+    # first quarter of frame width
+    first_quarter_width  = int(width/4)
+
+    # last quarter of frame width
+    last_quarter_width  = int(width - first_quarter_width)
+
+    # first eighth of frame width
+    first_eighth_width  = int(width/8)
+
+    # last eighth of frame width
+    last_eighth_width  = int(width - first_eighth_width)
+
+    cv2.line(img=frame, pt1=(first_quarter_width, 40), pt2=(first_quarter_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
+    cv2.line(img=frame, pt1=(last_quarter_width, 40), pt2=(last_quarter_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
+    cv2.line(img=frame, pt1=(first_eighth_width, 40), pt2=(first_eighth_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
+    cv2.line(img=frame, pt1=(last_eighth_width, 40), pt2=(last_eighth_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
+
+    # actual frame size IDK why id does this but this is the number that maintains accuracy for the hand detection
+    width = 480
+
+    # half of frame width
+    half_width  = int(width/2)
+
+    # first quarter of frame width
+    first_quarter_width  = int(width/4)
+
+    # last quarter of frame width
+    last_quarter_width  = int(width - first_quarter_width)
+
+    # first eighth of frame width
+    first_eighth_width  = int(width/8)
+
+    # last eighth of frame width
+    last_eighth_width  = int(width - first_eighth_width)
 
     
     # Flip the frame vertically
@@ -82,7 +115,7 @@ while True:
     className       = ''                        #
 
     # average x and y of hand
-    avx, avy        = 0, 0                 #             
+    avx, avy        = 0, 0                      #             
 
     # average x and y of palm
     avg_palm_x, avg_palm_y      = 0, 0          #
@@ -226,36 +259,35 @@ while True:
         #is the hand in a held position?
         isHeld = (not indexRaised) and (not middleRaised) and (not ringRaised) and (not pinkyRaised)
 
-        if (avg_palm_x > 200 and avg_palm_x < int(width-200)):
-            cv2.putText(frame, '0',  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
-            if(setup_file["serialOutput"] == "True"):
-                ser.write(b'0')
-        elif (avg_palm_x > 40 and avg_palm_x < 200):
-            cv2.putText(frame, '-1',  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
-            if(setup_file["serialOutput"] == "True"):
-                ser.write(b'-1')
-        elif (avg_palm_x < 40):
-            cv2.putText(frame, '-2',  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
-            if(setup_file["serialOutput"] == "True"):
-                ser.write(b'-2')
-        elif (avg_palm_x > int(width-200) and avg_palm_x < int(width-40)):
-            cv2.putText(frame, '1',  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
-            if(setup_file["serialOutput"] == "True"):
-                ser.write(b'1')
-        elif (avg_palm_x > int(width-40)):
-            cv2.putText(frame, '2',  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
-            if(setup_file["serialOutput"] == "True"):
-                ser.write(b'2')
-        elif (len(avx_list) > 1):
-            cv2.putText(frame, 'Hand not Found',  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
-        #elif (avg_palm_x > 200 and avg_palm_x < int(width-200) and str(thumbRaised)==True):
-            #cv2.putText(frame, 'PLAY' + str(thumbRaised),  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
-            #if(setup_file["serialOutput"] == "True"):
-                #ser.write(b'play')
-        #elif (avg_palm_x > 200 and avg_palm_x < int(width-200) and str(indexRaised)==True):
-            #cv2.putText(frame, 'PAUSE' + str(indexRaised),  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
-            #if(setup_file["serialOutput"] == "True"):
-                #ser.write(b'pause')
+        #check which quadrent the avg palm is
+        if(avg_palm_x>0 and avg_palm_x<first_eighth_width):
+            quadrent = 1
+        elif(avg_palm_x>first_eighth_width  and avg_palm_x<first_quarter_width):
+            quadrent = 2
+        elif(avg_palm_x>first_quarter_width and avg_palm_x<last_quarter_width):
+            quadrent = 3
+        elif(avg_palm_x>last_quarter_width  and avg_palm_x<last_eighth_width):
+            quadrent = 4
+        elif(avg_palm_x>last_eighth_width):
+            quadrent = 5
+        else:
+            quadrent = 0
+
+        cv2.putText(frame, str(quadrent),  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
+        if(setup_file["serialOutput"] == "True"):
+            ser.write(b'%d' % quadrent)
+
+        #if the quadrent is 3 ask if thumb is raised
+        # if(quadrent == 3):
+        #     if(thumbRaised):
+        #         if(setup_file["serialOutput"] == "True"):
+        #             ser.write(b'%d' % 1)
+        #     elif(indexRaised):
+        #         if(setup_file["serialOutput"] == "True"):
+        #             ser.write(b'%d' % -1)
+        #     else:
+        #         if(setup_file["serialOutput"] == "True"):
+        #             ser.write(b'%d' % 0)
 
         #if the hand is not held
         if(setup_file["mouseControl"] == "True"):
