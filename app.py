@@ -118,7 +118,7 @@ while True:
     # average x and y of hand
     avx, avy        = 0, 0                      #             
     size = 0;
-
+    
     # average x and y of palm
     avg_palm_x, avg_palm_y      = 0, 0          #
     
@@ -219,12 +219,31 @@ while True:
             #size of hand relative to screen
             size = round((x_range+y_range)/(width+height), 2)
 
+            
             # average of all the hand
             avx, avy                    = round(avx / len(handslms.landmark), 1), round(avy / len(handslms.landmark), 1)
             #average of the hand in relation to the palm
             avg_palm_x, avg_palm_y      = round((palm[0] + avx)/2, 1), round((palm[1] + avy)/2, 1)
             #distance of the thumb in relation to the palm
             dist_hand                   = distance(avg_palm_x, avg_palm_y, avx, avy)
+            
+            # store last five average x and y cooordinates
+            if  avx != 0 and avy != 0:
+                avx_list.append(avx)
+                avy_list.append(avy)
+                size_list.append(size)
+            if  len(avx_list) > 20:
+                avx_list.pop(0)
+                avy_list.pop(0)
+                size_list.pop(0)
+
+            # draw lines between last five average x and y cooordinates except the first and last
+            for i in range(1, len(avx_list)-1):
+                if int(size_list[i] != 0):
+                    thick = int(size_list[i]*15)
+                else:
+                    thick = 1 
+                cv2.line(frame, (int(avx_list[i]*1.33), int(avy_list[i])), (int(avx_list[i-1]*1.33), int(avy_list[i-1])), (0, i*10, 255), thick)#fancy line
             
             #index finger exists in the correct range to determine if the hand is in frame
             if  indexFingers_x[0]       != 0 :
@@ -250,15 +269,9 @@ while True:
             # Drawing landmarks on frames
             mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS)
 
-    # store last five average x and y cooordinates
-    if  avx != 0 and avy != 0:
-        avx_list.append(avx)
-        avy_list.append(avy)
-        size_list.append(size)
-    if  len(avx_list) > 5:
-        avx_list.pop(0)
-        avy_list.pop(0)
-        size_list.pop(0)
+    
+        #cv2.putText(frame, str(size_list[i]), (int(avx_list[i]), int(avy_list[i])), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+
     
     # if the hand is in the frame
     if  len(avx_list) > 1:
