@@ -41,7 +41,7 @@ f.close()                                   #
 cap         = cv2.VideoCapture(0)           #
 
 # average x and y coordinates of the hands
-avx_list, avy_list  = [], []    #average x and y points
+avx_list, avy_list, size_list  = [], [], []    #average x and y points
 
 # is a hand detected
 activate_gesture    = False #determines whether the gesture is activated
@@ -84,6 +84,7 @@ while True:
     cv2.line(img=frame, pt1=(last_quarter_width, 40), pt2=(last_quarter_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
     cv2.line(img=frame, pt1=(first_eighth_width, 40), pt2=(first_eighth_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
     cv2.line(img=frame, pt1=(last_eighth_width, 40), pt2=(last_eighth_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
+    cv2.line(img=frame, pt1=(half_width, 20), pt2=(half_width, int(height-20)), color=(0, 0, 255), thickness=2, lineType=8, shift=0)
 
     # actual frame size IDK why id does this but this is the number that maintains accuracy for the hand detection
     width = 480
@@ -116,6 +117,7 @@ while True:
 
     # average x and y of hand
     avx, avy        = 0, 0                      #             
+    size = 0;
 
     # average x and y of palm
     avg_palm_x, avg_palm_y      = 0, 0          #
@@ -214,6 +216,9 @@ while True:
             x_range = max(landmarks, key=lambda x: x[0])[0] - min(landmarks, key=lambda x: x[0])[0]
             y_range = max(landmarks, key=lambda x: x[1])[1] - min(landmarks, key=lambda x: x[1])[1]
 
+            #size of hand relative to screen
+            size = round((x_range+y_range)/(width+height), 2)
+
             # average of all the hand
             avx, avy                    = round(avx / len(handslms.landmark), 1), round(avy / len(handslms.landmark), 1)
             #average of the hand in relation to the palm
@@ -249,9 +254,11 @@ while True:
     if  avx != 0 and avy != 0:
         avx_list.append(avx)
         avy_list.append(avy)
+        size_list.append(size)
     if  len(avx_list) > 5:
         avx_list.pop(0)
         avy_list.pop(0)
+        size_list.pop(0)
     
     # if the hand is in the frame
     if  len(avx_list) > 1:
@@ -277,17 +284,14 @@ while True:
         else:
             quadrent = 0
 
+        #show the quadrent the hand is in
         cv2.putText(frame, str(quadrent),  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
         if(setup_file["serialOutput"] == "True"):
             ser.write(b'%d' % quadrent)
 
-        #size of hand relative to screen
-        size = round((x_range+y_range)/(width+height), 2)
-        
         #show hand size
         cv2.putText(frame, 'size: ' + str(size),  (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
         
-
         #if the quadrent is 3 ask if thumb is raised
         # if(quadrent == 3):
         #     if(thumbRaised):
