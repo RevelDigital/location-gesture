@@ -3,5 +3,6 @@
     "swipeControl" : "True",
     "crashChrisComputer" : "False",
     "portLocation" : null,
-    "serialOutput" : "False"
+    "serialOutput" : "False",
+    "quadrentVisualization" : "False"
 }

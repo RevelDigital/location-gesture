@@ -43,6 +43,9 @@ cap         = cv2.VideoCapture(0)           #
 # average x and y coordinates of the hands
 avx_list, avy_list, size_list  = [], [], []    #average x and y points
 
+# average x and y of hand
+avx, avy, size        = 0, 0, 0                #             
+
 # is a hand detected
 activate_gesture    = False #determines whether the gesture is activated
 
@@ -54,6 +57,8 @@ def distance(x1, y1, x2, y2):
     x2, y2: x and y coordinates of point 2
     """
     return ((x2 - x1)**2 + (y2 - y1)**2)**0.5   #calculate distance between two points
+
+
 
 # while true
 while True:
@@ -80,11 +85,12 @@ while True:
     # last eighth of frame width
     last_eighth_width  = int(width - first_eighth_width)
 
-    cv2.line(img=frame, pt1=(first_quarter_width, 40), pt2=(first_quarter_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
-    cv2.line(img=frame, pt1=(last_quarter_width, 40), pt2=(last_quarter_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
-    cv2.line(img=frame, pt1=(first_eighth_width, 40), pt2=(first_eighth_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
-    cv2.line(img=frame, pt1=(last_eighth_width, 40), pt2=(last_eighth_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
-    cv2.line(img=frame, pt1=(half_width, 20), pt2=(half_width, int(height-20)), color=(0, 0, 255), thickness=2, lineType=8, shift=0)
+    if(setup_file["quadrentVisualization"] == "True"):
+        cv2.line(img=frame, pt1=(first_quarter_width, 40), pt2=(first_quarter_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
+        cv2.line(img=frame, pt1=(last_quarter_width, 40), pt2=(last_quarter_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
+        cv2.line(img=frame, pt1=(first_eighth_width, 40), pt2=(first_eighth_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
+        cv2.line(img=frame, pt1=(last_eighth_width, 40), pt2=(last_eighth_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
+        cv2.line(img=frame, pt1=(half_width, 20), pt2=(half_width, int(height-20)), color=(0, 0, 255), thickness=2, lineType=8, shift=0)
 
     # actual frame size IDK why id does this but this is the number that maintains accuracy for the hand detection
     width = 480
@@ -103,7 +109,6 @@ while True:
 
     # last eighth of frame width
     last_eighth_width  = int(width - first_eighth_width)
-
     
     # Flip the frame vertically
     frame           = cv2.flip(frame, 1)        #
@@ -115,9 +120,9 @@ while True:
     # The predicted gesture
     className       = ''                        #
 
-    # average x and y of hand
-    avx, avy        = 0, 0                      #             
-    size = 0;
+    # # average x and y of hand
+    # avx, avy        = 0, 0                      #             
+    # size = 0;
     
     # average x and y of palm
     avg_palm_x, avg_palm_y      = 0, 0          #
@@ -140,11 +145,19 @@ while True:
     pinkyRaised     = True                      #is the pinky finger raised?
     pinkyFingers_x, pinkyFingers_y  = [0, 0], [0, 0]    #tip, base
     
+    for i in range(1, len(avx_list)-1):
+        if int(size_list[i] != 0):
+            thick = int(size_list[i]*15)
+        else:
+            thick = 1 
+        cv2.line(frame, (int(avx_list[i]*1.33), int(avy_list[i])), (int(avx_list[i-1]*1.33), int(avy_list[i-1])), (0, i*10, 255), thick)#fancy line
+
     # post process the result
     if  result.multi_hand_landmarks:
         landmarks   = []     #landmarks of each hand
+        # draw lines between last five average x and y cooordinates except the first and last
+        
         for handslms in result.multi_hand_landmarks:
-
             avx, avy= 0, 0      #average x, y of all the hand
             index   = 0         #index of the hand
 
@@ -219,7 +232,6 @@ while True:
             #size of hand relative to screen
             size = round((x_range+y_range)/(width+height), 2)
 
-            
             # average of all the hand
             avx, avy                    = round(avx / len(handslms.landmark), 1), round(avy / len(handslms.landmark), 1)
             #average of the hand in relation to the palm
@@ -227,24 +239,16 @@ while True:
             #distance of the thumb in relation to the palm
             dist_hand                   = distance(avg_palm_x, avg_palm_y, avx, avy)
             
-            # store last five average x and y cooordinates
+            # store last fifteen average x and y cooordinates
             if  avx != 0 and avy != 0:
                 avx_list.append(avx)
                 avy_list.append(avy)
                 size_list.append(size)
-            if  len(avx_list) > 20:
+            if  len(avx_list) > 15:
                 avx_list.pop(0)
                 avy_list.pop(0)
                 size_list.pop(0)
 
-            # draw lines between last five average x and y cooordinates except the first and last
-            for i in range(1, len(avx_list)-1):
-                if int(size_list[i] != 0):
-                    thick = int(size_list[i]*15)
-                else:
-                    thick = 1 
-                cv2.line(frame, (int(avx_list[i]*1.33), int(avy_list[i])), (int(avx_list[i-1]*1.33), int(avy_list[i-1])), (0, i*10, 255), thick)#fancy line
-            
             #index finger exists in the correct range to determine if the hand is in frame
             if  indexFingers_x[0]       != 0 :
                 thumbRaised             = (dist_hand < distance(thumbFingers_x[0],  thumbFingers_y[0],  avg_palm_x, avg_palm_y))
