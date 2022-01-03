@@ -4,5 +4,6 @@
     "crashChrisComputer" : "False",
     "portLocation" : null,
     "serialOutput" : "False",
-    "quadrentVisualization" : "False"
+    "quadrentVisualization" : "False",
+    "outputInTerminal" : "False"
 }
