@@ -24,8 +24,12 @@ if(setup_file["serialOutput"] == "True"):
     print("Serial Output: ON")
 else:
     print("Serial Output: OFF")
-print("Thumb up for PLAY")
-print("Index up for PAUSE")
+if(setup_file["outputInTerminal"] == "True"):
+    print("WILL Output in Terminal")
+else:
+    print("WILL NOT Output in Terminal")
+print("Thumb up for ACTION")
+
 
 # initialize mediapipe
 mpHands     = mp.solutions.hands            # hands = mpHands(x1, y1, x2, y2)
@@ -312,9 +316,11 @@ while True:
             quadrent = 0
 
         #show the quadrent the hand is in
-        cv2.putText(frame, str(quadrent),  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 255, 0), 1)
+        cv2.putText(frame, str(str(quadrent) + ", " + str(avx) + ", " + str(avy) + ", " + str(thumbRaised)),  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
         if(setup_file["serialOutput"] == "True"):
-            ser.write(b'%d' % quadrent)
+            #ser.write(b'%d' % quadrent)
+            #Need to confirm this v
+            ser.write(bytes(b'%d' % str(str(quadrent) + ', ' + str(avx) + ', ' + str(avy) + ', ' + str(thumbRaised)) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) + ', ' + str(thumbRaised)))
 
         #show hand size
         cv2.putText(frame, 'size: ' + str(size),  (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
@@ -330,6 +336,9 @@ while True:
         #     else:
         #         if(setup_file["serialOutput"] == "True"):
         #             ser.write(b'%d' % 0)
+        if(setup_file["outputInTerminal"] == "True"):
+            print(str(str(quadrent) + ', ' + str(avx) + ', ' + str(avy) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) + ', ' + str(thumbRaised)))
+            #(quadrent, x-coord of hand, y-coord of hand, camera res width, camera res height, is thumb raised?)
 
         #if the hand is not held
         if(setup_file["mouseControl"] == "True"):
