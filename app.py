@@ -93,7 +93,7 @@ while True:
     # last eighth of frame width
     last_eighth_width  = int(width - first_eighth_width)
 
-    if(setup_file["quadrentVisualization"] == "True"):
+    if(setup_file["quadrantVisualization"] == "True"):
         cv2.line(img=frame, pt1=(first_quarter_width, 40), pt2=(first_quarter_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
         cv2.line(img=frame, pt1=(last_quarter_width, 40), pt2=(last_quarter_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
         cv2.line(img=frame, pt1=(first_eighth_width, 40), pt2=(first_eighth_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
@@ -301,32 +301,32 @@ while True:
         #is the hand in a held position?
         isHeld = (not indexRaised) and (not middleRaised) and (not ringRaised) and (not pinkyRaised)
 
-        #check which quadrent the avg palm is
+        #check which quadrant the avg palm is
         if(avg_palm_x>0 and avg_palm_x<first_eighth_width):
-            quadrent = 1
+            quadrant = 1
         elif(avg_palm_x>first_eighth_width  and avg_palm_x<first_quarter_width):
-            quadrent = 2
+            quadrant = 2
         elif(avg_palm_x>first_quarter_width and avg_palm_x<last_quarter_width):
-            quadrent = 3
+            quadrant = 3
         elif(avg_palm_x>last_quarter_width  and avg_palm_x<last_eighth_width):
-            quadrent = 4
+            quadrant = 4
         elif(avg_palm_x>last_eighth_width):
-            quadrent = 5
+            quadrant = 5
         else:
-            quadrent = 0
+            quadrant = 0
 
-        #show the quadrent the hand is in
-        cv2.putText(frame, str(str(quadrent) + ", " + str(avx) + ", " + str(avy) + ", " + str(thumbRaised)),  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
+        #show the quadrant the hand is in
+        cv2.putText(frame, str(str(quadrant) + ", " + str(avx) + ", " + str(avy) + ", " + str(thumbRaised)),  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
         if(setup_file["serialOutput"] == "True"):
-            #ser.write(b'%d' % quadrent)
+            #ser.write(b'%d' % quadrant)
             #Need to confirm this v
-            ser.write(str(quadrent) + ', ' + str(avx) + ', ' + str(avy) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) + ', ' + str(thumbRaised))
+            ser.write(str(quadrant) + ', ' + str(avx) + ', ' + str(avy) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) + ', ' + str(thumbRaised) + '\n')
 
         #show hand size
         cv2.putText(frame, 'size: ' + str(size),  (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
         
-        #if the quadrent is 3 ask if thumb is raised
-        # if(quadrent == 3):
+        #if the quadrant is 3 ask if thumb is raised
+        # if(quadrant == 3):
         #     if(thumbRaised):
         #         if(setup_file["serialOutput"] == "True"):
         #             ser.write(b'%d' % 1)
@@ -337,8 +337,8 @@ while True:
         #         if(setup_file["serialOutput"] == "True"):
         #             ser.write(b'%d' % 0)
         if(setup_file["outputInTerminal"] == "True"):
-            print(str(str(quadrent) + ', ' + str(avx) + ', ' + str(avy) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) + ', ' + str(thumbRaised)))
-            #(quadrent, x-coord of hand, y-coord of hand, camera res width, camera res height, is thumb raised?)
+            print(str(str(quadrant) + ', ' + str(avx) + ', ' + str(avy) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) + ', ' + str(thumbRaised)))
+            #(quadrant, x-coord of hand, y-coord of hand, camera res width, camera res height, is thumb raised?)
 
         #if the hand is not held
         if(setup_file["mouseControl"] == "True"):
