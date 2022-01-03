@@ -320,7 +320,7 @@ while True:
         if(setup_file["serialOutput"] == "True"):
             #ser.write(b'%d' % quadrent)
             #Need to confirm this v
-            ser.write(bytes(b'%d' % str(str(quadrent) + ', ' + str(avx) + ', ' + str(avy) + ', ' + str(thumbRaised)) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) + ', ' + str(thumbRaised)))
+            ser.write(str(quadrent) + ', ' + str(avx) + ', ' + str(avy) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) + ', ' + str(thumbRaised))
 
         #show hand size
         cv2.putText(frame, 'size: ' + str(size),  (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
