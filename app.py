@@ -17,7 +17,7 @@ def json_to_dict(filename):
 
 setup_file = json_to_dict(r'SETUP.json')
 
-#opens serial port on default 9600,8,N,1 no timeout
+#opens serial port on default 9600,8,N,1 no timeout # Tutorial https://stackoverflow.com/questions/16701401/python-and-serial-how-to-send-a-message-and-receive-an-answer
 ser = serial.Serial(setup_file["portLocation"])
 print("Serial port being used: " + str(ser.name)) #prints the port that is really being used
 if(setup_file["serialOutput"] == "True"):
@@ -37,8 +37,12 @@ f           = open('gesture.names', 'r')    #
 classNames  = f.read().split('\n')          #
 f.close()                                   #   
 
+
+#which webcam to use 0 = main, 1 = secondary etc
+which_webcam = 0
+
 # Initialize the webcam
-cap         = cv2.VideoCapture(0)           #
+cap         = cv2.VideoCapture(which_webcam)           #
 
 # average x and y coordinates of the hands
 avx_list, avy_list, size_list  = [], [], []    #average x and y points
@@ -96,16 +100,16 @@ while True:
     width = 480
 
     # half of frame width
-    half_width  = int(width/2)
+    half_width  = int(width/2)                  #
 
     # first quarter of frame width
-    first_quarter_width  = int(width/4)
+    first_quarter_width  = int(width/4)         #
 
     # last quarter of frame width
     last_quarter_width  = int(width - first_quarter_width)
 
     # first eighth of frame width
-    first_eighth_width  = int(width/8)
+    first_eighth_width  = int(width/8)          #
 
     # last eighth of frame width
     last_eighth_width  = int(width - first_eighth_width)
@@ -249,26 +253,32 @@ while True:
                 avy_list.pop(0)
                 size_list.pop(0)
 
+            # setting a sensitivity for how much each finger is considered raised or not
+            sensitivity = 0.5
+            
             #index finger exists in the correct range to determine if the hand is in frame
             if  indexFingers_x[0]       != 0 :
-                thumbRaised             = (dist_hand < distance(thumbFingers_x[0],  thumbFingers_y[0],  avg_palm_x, avg_palm_y))
-                indexRaised             = (dist_hand < distance(indexFingers_x[0],  indexFingers_y[0],  avg_palm_x, avg_palm_y))
-                middleRaised            = (dist_hand < distance(middleFingers_x[0], middleFingers_y[0], avg_palm_x, avg_palm_y))
-                ringRaised              = (dist_hand < distance(ringFingers_x[0],   ringFingers_y[0],   avg_palm_x, avg_palm_y))
-                pinkyRaised             = (dist_hand < distance(pinkyFingers_x[0],  pinkyFingers_y[0],  avg_palm_x, avg_palm_y))
+                thumbRaised             = (dist_hand < distance(thumbFingers_x[0],  thumbFingers_y[0],  avg_palm_x, avg_palm_y)*sensitivity)
+                indexRaised             = (dist_hand < distance(indexFingers_x[0],  indexFingers_y[0],  avg_palm_x, avg_palm_y)*sensitivity)
+                middleRaised            = (dist_hand < distance(middleFingers_x[0], middleFingers_y[0], avg_palm_x, avg_palm_y)*sensitivity)
+                ringRaised              = (dist_hand < distance(ringFingers_x[0],   ringFingers_y[0],   avg_palm_x, avg_palm_y)*sensitivity)
+                pinkyRaised             = (dist_hand < distance(pinkyFingers_x[0],  pinkyFingers_y[0],  avg_palm_x, avg_palm_y)*sensitivity)
                 
             #print if fingers are raised or not
-            #cv2.putText(frame, 'Thumb Raised: ' + str(thumbRaised),  (10, 10), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
-            #cv2.putText(frame, 'Index Raised: ' + str(indexRaised),  (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
-            #cv2.putText(frame, 'Middle Raised: '+ str(middleRaised), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
-            #cv2.putText(frame, 'Ring Raised: '  + str(ringRaised),   (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
-            #cv2.putText(frame, 'Pinky Raised: ' + str(pinkyRaised),  (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+            cv2.putText(frame, 'Thumb Raised: ' + str(thumbRaised),  (10, 10), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+            cv2.putText(frame, 'Index Raised: ' + str(indexRaised),  (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+            cv2.putText(frame, 'Middle Raised: '+ str(middleRaised), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+            cv2.putText(frame, 'Ring Raised: '  + str(ringRaised),   (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+            cv2.putText(frame, 'Pinky Raised: ' + str(pinkyRaised),  (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
             
             if(setup_file["crashChrisComputer"] == "True"):
                 #reset index
                 index = 0
                 # Drawing landmarks on frames
                 mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS)
+
+            #reset index
+            index = 0
 
             # Drawing landmarks on frames
             mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS)
