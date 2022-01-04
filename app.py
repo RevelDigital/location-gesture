@@ -320,7 +320,7 @@ while True:
         if(setup_file["serialOutput"] == "True"):
             #ser.write(b'%d' % quadrant)
             #Need to confirm this v
-            ser.write(str(quadrant) + ', ' + str(avx) + ', ' + str(avy) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) + ', ' + str(thumbRaised) + '\n')
+            ser.write('gesture' + '|' + str(quadrant) + '|' + str(round(avx)) + '|' + str(round(avy)) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + '|' + str(thumbRaised) + '\n')
 
         #show hand size
         cv2.putText(frame, 'size: ' + str(size),  (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
@@ -337,7 +337,7 @@ while True:
         #         if(setup_file["serialOutput"] == "True"):
         #             ser.write(b'%d' % 0)
         if(setup_file["outputInTerminal"] == "True"):
-            print(str(str(quadrant) + ', ' + str(avx) + ', ' + str(avy) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) + ', ' + str(thumbRaised)))
+            print(str(str(quadrant) + ', ' + str(round(avx)) + ', ' + str(round(avy)) + ', ' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + ', ' + str(round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + ', ' + str(thumbRaised)))
             #(quadrant, x-coord of hand, y-coord of hand, camera res width, camera res height, is thumb raised?)
 
         #if the hand is not held
