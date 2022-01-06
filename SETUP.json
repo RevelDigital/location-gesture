@@ -2,8 +2,8 @@
     "mouseControl" : "False",
     "swipeControl" : "True",
     "crashChrisComputer" : "False",
-    "portLocation" : null,
-    "serialOutput" : "False",
+    "portLocation" : "/dev/ttyUSB3",
+    "serialOutput" : "True",
     "quadrantVisualization" : "False",
     "outputInTerminal" : "True"
 }
