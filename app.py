@@ -15,10 +15,11 @@ def json_to_dict(filename):
     f.close()
     return out
 
-setup_file = json_to_dict(r'SETUP.json')
+setup_file = json_to_dict(r'/home/upsquared/Desktop/location-gesture-main/SETUP.json')
 
 #opens serial port on default 9600,8,N,1 no timeout # Tutorial https://stackoverflow.com/questions/16701401/python-and-serial-how-to-send-a-message-and-receive-an-answer
-ser = serial.Serial(setup_file["portLocation"])
+ser = serial.Serial("/dev/ttyUSB0")
+#ser.open()
 print("Serial port being used: " + str(ser.name)) #prints the port that is really being used
 if(setup_file["serialOutput"] == "True"):
     print("Serial Output: ON")
@@ -37,7 +38,7 @@ hands       = mpHands.Hands(max_num_hands=1, min_detection_confidence=0.7) #more
 mpDraw      = mp.solutions.drawing_utils    # draw on the image
 
 # Load class names
-f           = open('gesture.names', 'r')    #
+f           = open('/home/upsquared/Desktop/location-gesture-main/gesture.names', 'r')    #
 classNames  = f.read().split('\n')          #
 f.close()                                   #   
 
@@ -270,10 +271,30 @@ while True:
                 
             #print if fingers are raised or not
             cv2.putText(frame, 'Thumb Raised: ' + str(thumbRaised),  (10, 10), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+            if thumbRaised == True:
+                thumbR = 1
+            else:
+                thumbR = 0
             cv2.putText(frame, 'Index Raised: ' + str(indexRaised),  (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+            if indexRaised == True:
+                indexR = 1
+            else:
+                indexR = 0
             cv2.putText(frame, 'Middle Raised: '+ str(middleRaised), (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+            if middleRaised == True:
+                middleR = 1
+            else:
+                middleR = 0
             cv2.putText(frame, 'Ring Raised: '  + str(ringRaised),   (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+            if ringRaised == True:
+                ringR = 1
+            else:
+                ringR = 0
             cv2.putText(frame, 'Pinky Raised: ' + str(pinkyRaised),  (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+            if pinkyRaised == True:
+                pinkyR = 1
+            else:
+                pinkyR = 0
             
             if(setup_file["crashChrisComputer"] == "True"):
                 #reset index
@@ -320,7 +341,7 @@ while True:
         if(setup_file["serialOutput"] == "True"):
             #ser.write(b'%d' % quadrent)
             #Need to confirm this v
-            ser.write(str(quadrent) + ', ' + str(avx) + ', ' + str(avy) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) + ', ' + str(thumbRaised))
+            ser.write(bytes('gesture' + '|' + str(quadrent) + '|' + str(round(avx)) + '|' + str(round(avy)) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))+ '|' + str(indexR) + '|' + str(middleR) + '|' + str(ringR) + '|' + str(pinkyR) + '|' + str(thumbRaised) + '\n', encoding='utf8'))
 
         #show hand size
         cv2.putText(frame, 'size: ' + str(size),  (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
@@ -337,7 +358,7 @@ while True:
         #         if(setup_file["serialOutput"] == "True"):
         #             ser.write(b'%d' % 0)
         if(setup_file["outputInTerminal"] == "True"):
-            print(str(str(quadrent) + ', ' + str(avx) + ', ' + str(avy) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) + ', ' + str(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) + ', ' + str(thumbRaised)))
+            print(str(str(quadrent) + ', ' + str(round(avx)) + ', ' + str(round(avy)) + ', ' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + ', ' + str(round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + ', ' + str(indexR) + ', ' + str(middleR) + ', ' + str(ringR) + ', ' + str(pinkyR) + ', ' + str(thumbRaised)))
             #(quadrent, x-coord of hand, y-coord of hand, camera res width, camera res height, is thumb raised?)
 
         #if the hand is not held
@@ -363,6 +384,7 @@ while True:
         
     # Show the final output
     cv2.imshow("Output", frame)
+    #cv2.waitKey(100) #10 fps
 
     # Press q to quit
     if  cv2.waitKey(1) == ord('q'):
