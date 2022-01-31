@@ -20,7 +20,6 @@ def startLimit():
     Timer(.1, startLimit).start()
 startLimit();
 
-
 # a function that calculates distance between two points
 def distance(x1, y1, x2, y2):
     """
@@ -29,8 +28,6 @@ def distance(x1, y1, x2, y2):
     x2, y2: x and y coordinates of point 2
     """
     return ((x2 - x1)**2 + (y2 - y1)**2)**0.5   #calculate distance between two points
-
-
 
 def json_to_dict(filename):
     with open(filename) as f:
@@ -55,7 +52,6 @@ try:
         print("WILL NOT Output in Terminal")
     print("Thumb up for ACTION")
 
-
     # initialize mediapipe
     mpHands     = mp.solutions.hands            # hands = mpHands(x1, y1, x2, y2)
     hands       = mpHands.Hands(max_num_hands=1, min_detection_confidence=0.7) #more hands
@@ -65,7 +61,6 @@ try:
     f           = open('/home/upsquared/Desktop/location-gesture-main/gesture.names', 'r')    #
     classNames  = f.read().split('\n')          #
     f.close()                                   #   
-
 
     #which webcam to use 0 = main, 1 = secondary etc
     which_webcam = 0
@@ -81,8 +76,6 @@ try:
 
     # is a hand detected
     activate_gesture    = False #determines whether the gesture is activated
-
-
 
     # while true
     while True:
@@ -169,13 +162,6 @@ try:
         pinkyRaised     = True                      #is the pinky finger raised?
         pinkyFingers_x, pinkyFingers_y  = [0, 0], [0, 0]    #tip, base
         
-        #for i in range(1, len(avx_list)-1):
-        #    if int(size_list[i] != 0):
-        #        thick = int(size_list[i]*15)
-        #    else:
-        #        thick = 1 
-        #    cv2.line(frame, (int(avx_list[i]*1.33), int(avy_list[i])), (int(avx_list[i-1]*1.33), int(avy_list[i-1])), (0, i*10, 255), thick)#fancy line
-
         # post process the result
         if  result.multi_hand_landmarks:
             landmarks   = []     #landmarks of each hand
@@ -274,7 +260,7 @@ try:
                     size_list.pop(0)
 
                 # setting a sensitivity for how much each finger is considered raised or not
-                sensitivity = 0.4
+                sensitivity = 0.6
                 
                 #index finger exists in the correct range to determine if the hand is in frame
                 if  indexFingers_x[0]       != 0 :
@@ -327,10 +313,6 @@ try:
 
                 # Drawing landmarks on frames
                 mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS)
-
-        
-            #cv2.putText(frame, str(size_list[i]), (int(avx_list[i]), int(avy_list[i])), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
-
         
         # if the hand is in the frame
         if  len(avx_list) > 1:
@@ -365,21 +347,10 @@ try:
             #show hand size
             cv2.putText(frame, 'size: ' + str(size),  (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
             
-            #if the quadrent is 3 ask if thumb is raised
-            # if(quadrent == 3):
-            #     if(thumbRaised):
-            #         if(setup_file["serialOutput"] == "True"):
-            #             ser.write(b'%d' % 1)
-            #     elif(indexRaised):
-            #         if(setup_file["serialOutput"] == "True"):
-            #             ser.write(b'%d' % -1)
-            #     else:
-            #         if(setup_file["serialOutput"] == "True"):
-            #             ser.write(b'%d' % 0)
             if(setup_file["outputInTerminal"] == "True"):
                 if  indexFingers_x[0]       != 0 :
                     print(str(str(quadrent) + ', ' + str(round(avx)) + ', ' + str(round(avy)) + ', ' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + ', ' + str(round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + ', ' + str(indexR) + ', ' + str(middleR) + ', ' + str(ringR) + ', ' + str(pinkyR) + ', ' + str(isFist)))
-                #(quadrent, x-coord of hand, y-coord of hand, camera res width, camera res height, index finger raised, middle finger raised, ring finger raised, pinky finger raised, is thumb raised?)
+                #(quadrent, x-coord of hand, y-coord of hand, camera res width, camera res height, index finger raised, middle finger raised, ring finger raised, pinky finger raised, is fist?)
 
             #if the hand is not held
             if(setup_file["mouseControl"] == "True"):

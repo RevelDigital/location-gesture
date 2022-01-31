@@ -5,5 +5,5 @@
     "portLocation" : "/dev/ttyUSB3",
     "serialOutput" : "True",
     "quadrantVisualization" : "False",
-    "outputInTerminal" : "True"
+    "outputInTerminal" : "False"
 }
