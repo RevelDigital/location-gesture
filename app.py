@@ -36,10 +36,10 @@ def json_to_dict(filename):
     return out
 
 try:
-    setup_file = json_to_dict(r'/home/upsquared/Desktop/location-gesture-main/SETUP.json')
+    setup_file = json_to_dict(r'/home/pi/Desktop/location-gesture-main/SETUP.json')
 
     #opens serial port on default 9600,8,N,1 no timeout # Tutorial https://stackoverflow.com/questions/16701401/python-and-serial-how-to-send-a-message-and-receive-an-answer
-    ser = serial.Serial("/dev/ttyUSB0")
+    ser = serial.Serial("/dev/ttyS0")
     #ser.open()
     print("Serial port being used: " + str(ser.name)) #prints the port that is really being used
     if(setup_file["serialOutput"] == "True"):
@@ -50,7 +50,6 @@ try:
         print("WILL Output in Terminal")
     else:
         print("WILL NOT Output in Terminal")
-    print("Thumb up for ACTION")
 
     # initialize mediapipe
     mpHands     = mp.solutions.hands            # hands = mpHands(x1, y1, x2, y2)
@@ -58,15 +57,15 @@ try:
     mpDraw      = mp.solutions.drawing_utils    # draw on the image
 
     # Load class names
-    f           = open('/home/upsquared/Desktop/location-gesture-main/gesture.names', 'r')    #
+    f           = open('/home/pi/Desktop/location-gesture-main/gesture.names', 'r')    #
     classNames  = f.read().split('\n')          #
     f.close()                                   #   
 
     #which webcam to use 0 = main, 1 = secondary etc
     which_webcam = 0
-
     # Initialize the webcam
-    cap         = cv2.VideoCapture(which_webcam)           #
+    cap         = cv2.VideoCapture(which_webcam, cv2.WND_PROP_FULLSCREEN)
+    #cv2.setWindowTitle("Output")
 
     # average x and y coordinates of the hands
     avx_list, avy_list, size_list  = [], [], []    #average x and y points
@@ -102,7 +101,7 @@ try:
         # last eighth of frame width
         last_eighth_width  = int(width - first_eighth_width)
 
-        if(setup_file["quadrentVisualization"] == "True"):
+        if(setup_file["quadrantVisualization"] == "True"):
             cv2.line(img=frame, pt1=(first_quarter_width, 40), pt2=(first_quarter_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
             cv2.line(img=frame, pt1=(last_quarter_width, 40), pt2=(last_quarter_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
             cv2.line(img=frame, pt1=(first_eighth_width, 40), pt2=(first_eighth_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
@@ -374,6 +373,10 @@ try:
                         print("pressed")
             
         # Show the final output
+        cv2.namedWindow("Output", cv2.WND_PROP_FULLSCREEN)
+        cv2.setWindowProperty("Output", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        if(setup_file["videoFeedPortrait"] == "True"):
+            frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
         cv2.imshow("Output", frame)
         #cv2.waitKey(100) #10 fps
 
@@ -389,4 +392,6 @@ try:
     cv2.destroyAllWindows()
 except serial.SerialException as e:
     print(str(e))
-    os.system('systemctl reboot -i')
+    os.system('sudo reboot now')
+    #print("serialException Error")
+
