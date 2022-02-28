@@ -2,8 +2,10 @@
     "mouseControl" : "False",
     "swipeControl" : "True",
     "crashChrisComputer" : "False",
-    "portLocation" : "/dev/ttyUSB3",
+    "portLocation" : "/dev/ttyS0",
     "serialOutput" : "True",
     "quadrantVisualization" : "False",
-    "outputInTerminal" : "False"
+    "outputInTerminal" : "False",
+    "videoFeedPortrait" : "True"
 }
+
