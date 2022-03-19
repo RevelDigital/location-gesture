@@ -6,6 +6,6 @@
     "serialOutput" : "True",
     "quadrantVisualization" : "False",
     "outputInTerminal" : "False",
-    "videoFeedPortrait" : "True"
+    "videoFeedPortrait" : "False"
 }
 

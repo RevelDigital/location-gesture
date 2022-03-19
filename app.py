@@ -1,4 +1,3 @@
-# import the necessary packages
 import cv2
 import time
 import mouse
@@ -37,11 +36,10 @@ def json_to_dict(filename):
 
 try:
     setup_file = json_to_dict(r'/home/pi/Desktop/location-gesture-main/SETUP.json')
-
     #opens serial port on default 9600,8,N,1 no timeout # Tutorial https://stackoverflow.com/questions/16701401/python-and-serial-how-to-send-a-message-and-receive-an-answer
     ser = serial.Serial("/dev/ttyS0")
-    #ser.open()
-    print("Serial port being used: " + str(ser.name)) #prints the port that is really being used
+    #prints the port that is really being used
+    print("Serial port being used: " + str(ser.name))
     if(setup_file["serialOutput"] == "True"):
         print("Serial Output: ON")
     else:
@@ -65,8 +63,6 @@ try:
     which_webcam = 0
     # Initialize the webcam
     cap         = cv2.VideoCapture(which_webcam, cv2.WND_PROP_FULLSCREEN)
-    #cv2.setWindowTitle("Output")
-
     # average x and y coordinates of the hands
     avx_list, avy_list, size_list  = [], [], []    #average x and y points
 
@@ -76,11 +72,11 @@ try:
     # is a hand detected
     activate_gesture    = False #determines whether the gesture is activated
 
-    # while true
     while True:
         # Read each frame from the webcam
         _, frame        = cap.read()                #
-        x, y, c         = frame.shape               #  
+        x, y, c         = frame.shape               # 
+         
         #dimensions = cap.shape
         #width = cap.shape[1]
         width  = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
@@ -135,10 +131,6 @@ try:
 
         # The predicted gesture
         className       = ''                        #
-
-        # # average x and y of hand
-        # avx, avy        = 0, 0                      #             
-        # size = 0;
         
         # average x and y of palm
         avg_palm_x, avg_palm_y      = 0, 0          #
@@ -378,7 +370,6 @@ try:
         if(setup_file["videoFeedPortrait"] == "True"):
             frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
         cv2.imshow("Output", frame)
-        #cv2.waitKey(100) #10 fps
 
         # Press q to quit
         if  cv2.waitKey(1) == ord('q'):
@@ -393,5 +384,4 @@ try:
 except serial.SerialException as e:
     print(str(e))
     os.system('sudo reboot now')
-    #print("serialException Error")
-
+    
