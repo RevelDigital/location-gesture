@@ -36,14 +36,14 @@ def json_to_dict(filename):
     return out
 
 try:
-    setup_file = json_to_dict(r'/home/upsquared/Desktop/location-gesture-main/SETUP.json')
+    setup_file = json_to_dict('SETUP.json')
 
-    #opens serial port on default 9600,8,N,1 no timeout # Tutorial https://stackoverflow.com/questions/16701401/python-and-serial-how-to-send-a-message-and-receive-an-answer
-    ser = serial.Serial("/dev/ttyUSB0")
     #ser.open()
-    print("Serial port being used: " + str(ser.name)) #prints the port that is really being used
     if(setup_file["serialOutput"] == "True"):
         print("Serial Output: ON")
+        #opens serial port on default 9600,8,N,1 no timeout # Tutorial https://stackoverflow.com/questions/16701401/python-and-serial-how-to-send-a-message-and-receive-an-answer
+        ser = serial.Serial("/dev/ttyUSB0")
+        print("Serial port being used: " + str(ser.name)) #prints the port that is really being used
     else:
         print("Serial Output: OFF")
     if(setup_file["outputInTerminal"] == "True"):
@@ -58,7 +58,7 @@ try:
     mpDraw      = mp.solutions.drawing_utils    # draw on the image
 
     # Load class names
-    f           = open('/home/upsquared/Desktop/location-gesture-main/gesture.names', 'r')    #
+    f           = open('gesture.names', 'r')    #
     classNames  = f.read().split('\n')          #
     f.close()                                   #   
 
@@ -77,10 +77,20 @@ try:
     # is a hand detected
     activate_gesture    = False #determines whether the gesture is activated
 
+    # cropped location
+    crop_x=setup_file["camera_zone"]["x"]
+    crop_y=setup_file["camera_zone"]["y"]
+    crop_w=setup_file["camera_zone"]["w"]
+    crop_h=setup_file["camera_zone"]["h"]
+
     # while true
     while True:
         # Read each frame from the webcam
         _, frame        = cap.read()                #
+
+        # Resize the frame to a smaller size based on x, y, width, height
+        frame           = frame[crop_y:crop_y+crop_h, crop_x:crop_x+crop_w]
+
         x, y, c         = frame.shape               #  
         #dimensions = cap.shape
         #width = cap.shape[1]
@@ -102,7 +112,7 @@ try:
         # last eighth of frame width
         last_eighth_width  = int(width - first_eighth_width)
 
-        if(setup_file["quadrentVisualization"] == "True"):
+        if(setup_file["quadrantVisualization"] == "True"):
             cv2.line(img=frame, pt1=(first_quarter_width, 40), pt2=(first_quarter_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
             cv2.line(img=frame, pt1=(last_quarter_width, 40), pt2=(last_quarter_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
             cv2.line(img=frame, pt1=(first_eighth_width, 40), pt2=(first_eighth_width, int(height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0) 
@@ -341,7 +351,7 @@ try:
             #show the quadrent the hand is in
             cv2.putText(frame, str(str(quadrent) + ", " + str(avx) + ", " + str(avy) + ", " + str(isFist)),  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
             if(setup_file["serialOutput"] == "True" and canSend):
-                if  indexFingers_x[0]       != 0 :
+                if  indexFingers_x[0]       != 0 and setup_file["serialOutput"] == "True":
                     ser.write(bytes('gesture' + '|' + str(quadrent) + '|' + str(round(avx)) + '|' + str(round(avy)) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))+ '|' + str(indexR) + '|' + str(middleR) + '|' + str(ringR) + '|' + str(pinkyR) + '|' + str(isFist) + '\n', encoding='utf8'))
                 canSend = False
             #show hand size
@@ -379,7 +389,8 @@ try:
 
         # Press q to quit
         if  cv2.waitKey(1) == ord('q'):
-            ser.close()
+            if setup_file["serialOutput"] == "True":
+                ser.close()
             break
 
     # release the webcam and destroy all active windows
@@ -388,5 +399,7 @@ try:
     # destroy all windows
     cv2.destroyAllWindows()
 except serial.SerialException as e:
+
     print(str(e))
-    os.system('systemctl reboot -i')
+    if setup_file["serialOutput"] == "True":
+        os.system('systemctl reboot -i')

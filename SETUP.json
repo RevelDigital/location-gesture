@@ -3,7 +3,13 @@
     "swipeControl" : "True",
     "crashChrisComputer" : "False",
     "portLocation" : "/dev/ttyUSB3",
-    "serialOutput" : "True",
+    "serialOutput" : "False",
     "quadrantVisualization" : "False",
-    "outputInTerminal" : "False"
+    "outputInTerminal" : "False",
+    "camera_zone":{
+        "x":20,
+        "y":20,
+        "w":200,
+        "h":200
+    }
 }
