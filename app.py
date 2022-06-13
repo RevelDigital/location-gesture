@@ -2,14 +2,10 @@
 import cv2
 import time
 import mouse
-import numpy as np
 import mediapipe as mp
-from math import atan2, pi, trunc
 import serial
 import json
-import requests
 from threading import Timer
-import queue
 import os 
 
 global canSend
@@ -30,11 +26,13 @@ def distance(x1, y1, x2, y2):
     return ((x2 - x1)**2 + (y2 - y1)**2)**0.5   #calculate distance between two points
 
 def json_to_dict(filename):
-    with open(filename) as f:
-        out = json.load(f)
-    f.close()
-    return out
-
+    try:
+        with open(filename) as f:out = json.load(f)
+        f.close()
+        return out
+    except:
+        print("Error: file not found")
+        quit()
 try:
     setup_file = json_to_dict('SETUP.json')
 
