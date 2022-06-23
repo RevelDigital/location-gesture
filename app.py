@@ -17,6 +17,10 @@ def startLimit():
     Timer(.1, startLimit).start()
 startLimit();
 
+# for keeping landmarks just in case
+last_landmarks = False
+countdown = 0
+
 # a function that calculates distance between two points
 def distance(x1, y1, x2, y2):
     """
@@ -105,8 +109,8 @@ try:
         result          = hands.process(framergb)# Get hand landmark prediction
         className       = ''# The predicted gesture
 
-        frame =  np.zeros((int(ahit),int(awid),1), dtype=np.uint8) #test_fr=np.zeros(shape=[ht,wt,ch],dtype=np.uint8)
-        
+        frame =  np.zeros((int(ahit),int(awid),3),dtype=np.uint8) #test_fr=np.zeros(shape=[ht,wt,ch],dtype=np.uint8)
+        frame[:]=(25,0,0)
         # # average x and y of hand
         # avx, avy        = 0, 0                      #             
         # size = 0;
@@ -133,7 +137,10 @@ try:
         pinky_x,pinky_y=[0,0],[0,0]    #tip, base
         
         # post process the result
-        if  result.multi_hand_landmarks:
+        if  last_landmarks and countdown < 15:
+            if not result.multi_hand_landmarks:
+                result.multi_hand_landmarks = last_landmarks
+                countdown +=1
             landmarks=[]    #landmarks of each hand
             # draw lines between last five average x and y cooordinates except the first and last
             
@@ -149,7 +156,8 @@ try:
                     avy+=lmy #add y of landmark to the average y
                     
                     #label each point with a number
-                    cv2.putText(frame, str(index), (int(lmx*1.3), int(lmy*0.8)), cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 255, 255), 1)
+                    # cv2.putText(frame, str(index), (int(lmx*1.3), int(lmy*0.8)), cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 255, 255), 1)
+                    cv2.circle(frame, (int(lmx*1.3), int(lmy*0.8)), 2, (19,239,239), 1)
                     landmarks.append([lmx, lmy])  #add the point to the landmarks list
 
                     # palm   :  x, y
@@ -224,11 +232,10 @@ try:
                     
                 #reset index
                 index = 0
-
-                
-                # Drawing landmarks on frames
-                # mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS)
-                
+        
+        if result.multi_hand_landmarks:        
+            last_landmarks = result.multi_hand_landmarks   
+            countdown=0 
         
         # if the hand is in the frame
         if  len(avx_list) > 1:
