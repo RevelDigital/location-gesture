@@ -19,6 +19,9 @@ def startLimit():
     Timer(.1, startLimit).start()
 startLimit();
 
+last_landmarks = False
+countdown = 0
+
 #Function that calculates distance between two points
 def distance(x1, y1, x2, y2):
     """
@@ -73,13 +76,24 @@ try:
     #Is a hand detected?
     activate_gesture    = False
 
+    # cropped location
+    crop_x=setup_file["camera_zone"]["x"]
+    crop_y=setup_file["camera_zone"]["y"]
+    crop_w=setup_file["camera_zone"]["w"]
+    crop_h=setup_file["camera_zone"]["h"]
+
     while True:
         #Read each frame from the webcam
         _, frame        = cap.read()                #
+        # Resize the frame to a smaller size based on x, y, width, height
+        frame           = frame[crop_y:crop_y+crop_h, crop_x:crop_x+crop_w]
+
         x, y, c         = frame.shape               # 
          
         width  = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        awid = width
         height  = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        ahit = height
 
         #Half of frame width
         half_width  = int(width/2)
@@ -130,6 +144,9 @@ try:
 
         #The predicted gesture
         className       = ''                        #
+
+        frame =  np.zeros((int(ahit),int(awid),3),dtype=np.uint8) #test_fr=np.zeros(shape=[ht,wt,ch],dtype=np.uint8)
+        frame[:]=(25,0,0)
         
         #Average x and y of palm
         avg_palm_x, avg_palm_y      = 0, 0          #
@@ -153,7 +170,10 @@ try:
         pinkyFingers_x, pinkyFingers_y  = [0, 0], [0, 0]    #tip, base
         
         #Post process the result
-        if  result.multi_hand_landmarks:
+        if  last_landmarks and countdown < 15:
+            if not result.multi_hand_landmarks:
+                result.multi_hand_landmarks = last_landmarks
+                countdown +=1
             landmarks   = []     #Landmarks of each hand
             #Draw lines between last five average x and y cooordinates except the first and last
             
@@ -169,7 +189,8 @@ try:
                     avy += lmy
                     
                     #label each point with a number
-                    cv2.putText(frame, str(index), (int(lmx*1.3), int(lmy*0.8)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (12*index, 0, 255-12*index), 1)
+                    # cv2.putText(frame, str(index), (int(lmx*1.3), int(lmy*0.8)), cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 255, 255), 1)
+                    cv2.circle(frame, (int(lmx*1.3), int(lmy*0.8)), 2, (19,239,239), 1)
                     landmarks.append([lmx, lmy])  #add the point to the landmarks list
 
                     # palm   :  x, y
@@ -301,8 +322,9 @@ try:
                 #Reset index
                 index = 0
 
-                #Drawing landmarks on frames
-                mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS)
+                if result.multi_hand_landmarks:        
+                    last_landmarks = result.multi_hand_landmarks   
+                    countdown=0 
         
         # if the hand is in the frame
         if  len(avx_list) > 1:

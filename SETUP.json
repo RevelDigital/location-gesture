@@ -6,6 +6,12 @@
     "serialOutput" : "True",
     "quadrantVisualization" : "False",
     "outputInTerminal" : "False",
-    "videoFeedPortrait" : "False"
+    "videoFeedPortrait" : "False",
+    "camera_zone":{
+        "x":0,
+        "y":0,
+        "w":1200,
+        "h":1200
+    }
 }
 
