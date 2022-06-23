@@ -47,6 +47,8 @@ def json_to_dict(filename):
         print("Error: file not found")
         quit()
 
+output_test = []
+serial_output_test = True
 
 try:
     setup_file = json_to_dict('SETUP.json')
@@ -339,19 +341,26 @@ try:
             cv2.putText(frame, str(str(quadrent)+", "+str(avx)+", "+str(avy)+", " +
                         str(isFist)), (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
 
-            if(setup_file["serialOutput"] == "True" and canSend):
+            output_string = 'gesture' + '|' + str(quadrent) + '|' + str(round(avx)) + '|' + str(round(avy)) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + '|' + str(indexR) + '|' + str(middleR) + '|' + str(ringR) + '|' + str(pinkyR) + '|' + str(isFist) + '|' + str(size) + '\n'
+            output_test.append(output_string)
+            if len(output_test)>6:
+                output_test.pop(0)
+                if len(set(output_test)) == 1:
+                    serial_output_test= False
+                else:
+                    serial_output_test= True
+            
+                    
+            if(setup_file["serialOutput"] == "True" and canSend and serial_output_test):
                 if (index_x[0] != 0):
-                    ser.write(bytes('gesture' + '|' + str(quadrent) + '|' + str(round(avx)) + '|' + str(round(avy)) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + '|' + str(
-                        round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + '|' + str(indexR) + '|' + str(middleR) + '|' + str(ringR) + '|' + str(pinkyR) + '|' + str(isFist) + '|' + str(size) + '\n', encoding='utf8'))
+                    ser.write(bytes(output_string, encoding='utf8'))
                 canSend = False
             # show hand size
-            cv2.putText(frame, 'size: ' + str(size),  (10, 25),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
+            cv2.putText(frame, 'size: ' + str(size),  (10, 25),cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
 
-            if(setup_file["outputInTerminal"] == "True"):
+            if(setup_file["outputInTerminal"] == "True" and serial_output_test):
                 if  index_x[0] != 0 :
-                    print(str(str(quadrent) + ', ' + str(round(avx)) + ', ' + str(round(avy)) + ', ' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + ', ' + str(round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + ', ' + str(indexR) + ', ' + str(middleR) +
-                        ', ' + str(ringR) + ', ' + str(pinkyR) + ', ' + str(isFist) + ', ' + str(size)))  # (quadrent, x-coord of hand, y-coord of hand, camera res width, camera res height, index finger _R, middle finger _R, ring finger _R, pinky finger _R, is fist?, hand size)
+                    print(output_string)  # (quadrent, x-coord of hand, y-coord of hand, camera res width, camera res height, index finger _R, middle finger _R, ring finger _R, pinky finger _R, is fist?, hand size)
 
             # if the hand is not held
             if(setup_file["mouseControl"] == "True"):
