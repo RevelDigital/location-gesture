@@ -338,18 +338,20 @@ try:
             # show the quadrent the hand is in
             cv2.putText(frame, str(str(quadrent)+", "+str(avx)+", "+str(avy)+", " +
                         str(isFist)), (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
+
             if(setup_file["serialOutput"] == "True" and canSend):
-                if index_x[0] != 0 and setup_file["serialOutput"] == "True":
+                if (index_x[0] != 0):
                     ser.write(bytes('gesture' + '|' + str(quadrent) + '|' + str(round(avx)) + '|' + str(round(avy)) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + '|' + str(
-                        round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + '|' + str(indexR) + '|' + str(middleR) + '|' + str(ringR) + '|' + str(pinkyR) + '|' + str(isFist) + '\n', encoding='utf8'))
+                        round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + '|' + str(indexR) + '|' + str(middleR) + '|' + str(ringR) + '|' + str(pinkyR) + '|' + str(isFist) + '|' + str(size) + '\n', encoding='utf8'))
                 canSend = False
             # show hand size
             cv2.putText(frame, 'size: ' + str(size),  (10, 25),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
 
-            if(setup_file["outputInTerminal"] == "True") and (index_x[0] != 0):
-                print(str(str(quadrent) + ', ' + str(round(avx)) + ', ' + str(round(avy)) + ', ' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + ', ' + str(round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + ', ' + str(indexR) + ', ' + str(middleR) +
-                      ', ' + str(ringR) + ', ' + str(pinkyR) + ', ' + str(isFist)))  # (quadrent, x-coord of hand, y-coord of hand, camera res width, camera res height, index finger _R, middle finger _R, ring finger _R, pinky finger _R, is fist?)
+            if(setup_file["outputInTerminal"] == "True"):
+                if  index_x[0] != 0 :
+                    print(str(str(quadrent) + ', ' + str(round(avx)) + ', ' + str(round(avy)) + ', ' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + ', ' + str(round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + ', ' + str(indexR) + ', ' + str(middleR) +
+                        ', ' + str(ringR) + ', ' + str(pinkyR) + ', ' + str(isFist) + ', ' + str(size)))  # (quadrent, x-coord of hand, y-coord of hand, camera res width, camera res height, index finger _R, middle finger _R, ring finger _R, pinky finger _R, is fist?, hand size)
 
             # if the hand is not held
             if(setup_file["mouseControl"] == "True"):
