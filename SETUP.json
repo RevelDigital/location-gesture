@@ -7,9 +7,9 @@
     "quadrantVisualization" : "False",
     "outputInTerminal" : "False",
     "camera_zone":{
-        "x":20,
-        "y":20,
-        "w":200,
-        "h":200
+        "x":0,
+        "y":0,
+        "w":1200,
+        "h":1200
     }
 }
