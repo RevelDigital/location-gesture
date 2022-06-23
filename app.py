@@ -39,11 +39,13 @@ def json_to_dict(filename):
     return out
 
 try:
-    setup_file = json_to_dict(r'/home/pi/Desktop/location-gesture-main/SETUP.json')
+    setup_file = json_to_dict(r'SETUP.json')
     #Opens serial port on default 9600,8,N,1 no timeout
-    ser = serial.Serial("/dev/ttyS0")
+    if setup_file["serialOutput"] == "True":
+        ser = serial.Serial("/dev/ttyS0")
     #Prints the port that is really being used
-    print("Serial port being used: " + str(ser.name))
+    if setup_file["serialOutput"] == "True":
+        print("Serial port being used: " + str(ser.name))
     if(setup_file["serialOutput"] == "True"):
         print("Serial Output: ON")
     else:
@@ -59,7 +61,7 @@ try:
     mpDraw      = mp.solutions.drawing_utils    # draw on the image
 
     #Load class names
-    f           = open('/home/pi/Desktop/location-gesture-main/gesture.names', 'r')    #
+    f           = open('gesture.names', 'r')    #
     classNames  = f.read().split('\n')          #
     f.close()                                   #   
 
@@ -354,7 +356,8 @@ try:
             cv2.putText(frame, str(str(quadrent) + ", " + str(avx) + ", " + str(avy) + ", " + str(isFist)),  (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
             if(setup_file["serialOutput"] == "True" and canSend):
                 if  indexFingers_x[0]       != 0 :
-                    ser.write(bytes('gesture' + '|' + str(quadrent) + '|' + str(round(avx)) + '|' + str(round(avy)) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))+ '|' + str(indexR) + '|' + str(middleR) + '|' + str(ringR) + '|' + str(pinkyR) + '|' + str(isFist) + '\n', encoding='utf8'))
+                    if setup_file["serialOutput"] == "True":
+                        ser.write(bytes('gesture' + '|' + str(quadrent) + '|' + str(round(avx)) + '|' + str(round(avy)) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))+ '|' + str(indexR) + '|' + str(middleR) + '|' + str(ringR) + '|' + str(pinkyR) + '|' + str(isFist) + '\n', encoding='utf8'))
                 canSend = False
             #Display hand size
             cv2.putText(frame, 'size: ' + str(size),  (10, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
@@ -394,7 +397,8 @@ try:
 
         #Press q to quit
         if  cv2.waitKey(1) == ord('q'):
-            ser.close()
+            if setup_file["serialOutput"] == "True":
+                ser.close()
             break
 
     #Release the webcam and destroy all active windows

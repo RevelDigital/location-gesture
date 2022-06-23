@@ -3,7 +3,7 @@
     "swipeControl" : "True",
     "crashChrisComputer" : "False",
     "portLocation" : "/dev/ttyS0",
-    "serialOutput" : "True",
+    "serialOutput" : "False",
     "quadrantVisualization" : "False",
     "outputInTerminal" : "False",
     "videoFeedPortrait" : "False",
