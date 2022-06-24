@@ -138,7 +138,7 @@ try:
 
         # test_fr=np.zeros(shape=[ht,wt,ch],dtype=np.uint8)
         frame = np.zeros((int(ahit), int(awid), 3), dtype=np.uint8)
-        frame[:] = (25, 0, 0)
+        frame[:] = (255, 255, 255)
         # # average x and y of hand
         # avx, avy        = 0, 0                      #
         # size = 0;
@@ -185,8 +185,7 @@ try:
 
                     # label each point with a number
                     # cv2.putText(frame, str(index), (int(lmx*1.3), int(lmy*0.8)), cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 255, 255), 1)
-                    cv2.circle(frame, (int(lmx*1.3), int(lmy*0.8)),
-                               2, (19, 239, 239), 1)
+                    # cv2.circle(frame, (int(lmx*1.3), int(lmy*0.8)),7, (19, 239, 239), 3)
                     # add the point to the landmarks list
                     landmarks.append([lmx, lmy])
 
@@ -261,32 +260,32 @@ try:
                     pinky_R = (dist_hand < distance(
                         pinky_x[0], pinky_y[0], avg_palm_x, avg_palm_y)*sensitivity)
 
-                # print if fingers are _R or not
-                cv2.putText(frame, 'Thumb _R: ' + str(thumb_R),  (10, 10),
+                # print if fingers are raised or not
+                cv2.putText(frame, 'Thumb raised: ' + str(thumb_R),  (10, 10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
                 if thumb_R == True:
                     thumbR = 1
                 else:
                     thumbR = 0
-                cv2.putText(frame, 'Index _R: ' + str(index_R),  (10, 30),
+                cv2.putText(frame, 'Index raised: ' + str(index_R),  (10, 30),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
                 if index_R == True:
                     indexR = 1
                 else:
                     indexR = 0
-                cv2.putText(frame, 'Middle _R: ' + str(middle_R), (10, 50),
+                cv2.putText(frame, 'Middle raised: ' + str(middle_R), (10, 50),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
                 if middle_R == True:
                     middleR = 1
                 else:
                     middleR = 0
-                cv2.putText(frame, 'Ring _R: ' + str(ring_R),   (10, 70),
+                cv2.putText(frame, 'Ring raised: ' + str(ring_R),   (10, 70),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
                 if ring_R == True:
                     ringR = 1
                 else:
                     ringR = 0
-                cv2.putText(frame, 'Pinky _R: ' + str(pinky_R),  (10, 90),
+                cv2.putText(frame, 'Pinky raised: ' + str(pinky_R),  (10, 90),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
                 if pinky_R == True:
                     pinkyR = 1
@@ -301,8 +300,7 @@ try:
                 if(setup_file["crashChrisComputer"] == "True"):
                     index = 0
                     # Reset index, Drawing landmarks on frames
-                    mpDraw.draw_landmarks(
-                        frame, handslms, mpHands.HAND_CONNECTIONS)
+                mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS, landmark_drawing_spec = mpDraw.DrawingSpec(color=(0, 255, 255), thickness=-1, circle_radius=5),connection_drawing_spec = mpDraw.DrawingSpec(color=(50, 50, 50), thickness=5, circle_radius=2))
 
                 # reset index
                 index = 0
