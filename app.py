@@ -131,7 +131,7 @@ try:
         frame[:] = (255, 255, 255)
 
         # average x and y of palm
-        avg_palm_x, avg_palm_y = 0, 0          #
+        avg_palm_x, avg_palm_y = 0, 0
 
         palm = [0, 0]  # palm           : x, y
 
@@ -305,26 +305,26 @@ try:
             isHeld = (not index_R) and (not middle_R) and (
                 not ring_R) and (not pinky_R)
 
-            # check which quadrent the avg palm is
+            # check which quadrant the avg palm is
             if(avg_palm_x > 0 and avg_palm_x < first_eighth_width):
-                quadrent = 1
+                quadrant = 1
             elif(avg_palm_x > first_eighth_width and avg_palm_x < first_quarter_width):
-                quadrent = 2
+                quadrant = 2
             elif(avg_palm_x > first_quarter_width and avg_palm_x < last_quarter_width):
-                quadrent = 3
+                quadrant = 3
             elif(avg_palm_x > last_quarter_width and avg_palm_x < last_eighth_width):
-                quadrent = 4
+                quadrant = 4
             elif(avg_palm_x > last_eighth_width):
-                quadrent = 5
+                quadrant = 5
             else:
-                quadrent = 0
+                quadrant = 0
 
             if(setup_file["debugMode"] == "True"):
-                # show the quadrent the hand is in
-                cv2.putText(frame, str(str(quadrent)+", "+str(avx)+", "+str(avy)+", " +
+                # show the quadrant the hand is in
+                cv2.putText(frame, str(str(quadrant)+", "+str(avx)+", "+str(avy)+", " +
                             str(isFist)), (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
 
-            output_string = 'gesture' + '|' + str(quadrent) + '|' + str(round(avx)) + '|' + str(round(avy)) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + '|' + str(indexR) + '|' + str(middleR) + '|' + str(ringR) + '|' + str(pinkyR) + '|' + str(isFist) + '|' + str(size) + '\n'
+            output_string = 'gesture' + '|' + str(quadrant) + '|' + str(round(avx)) + '|' + str(round(avy)) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + '|' + str(indexR) + '|' + str(middleR) + '|' + str(ringR) + '|' + str(pinkyR) + '|' + str(isFist) + '|' + str(size) + '\n'
             output_test.append(output_string)
             if len(output_test)>6:
                 output_test.pop(0)
@@ -344,7 +344,7 @@ try:
 
             if(setup_file["outputInTerminal"] == "True" and serial_output_test):
                 if  index_x[0] != 0 :
-                    print(output_string)  # (quadrent, x-coord of hand, y-coord of hand, camera res width, camera res height, index finger _R, middle finger _R, ring finger _R, pinky finger _R, is fist?, hand size)
+                    print(output_string)  # (quadrant, x-coord of hand, y-coord of hand, camera res width, camera res height, index finger _R, middle finger _R, ring finger _R, pinky finger _R, is fist?, hand size)
 
             # if the hand is not held
             if(setup_file["mouseControl"] == "True"):

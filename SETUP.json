@@ -1,6 +1,6 @@
 {
     "mouseControl" : "False",
-    "swipeControl" : "True",
+    "swipeControl" : "False",
     "portLocation" : "/dev/ttyS0",
     "serialOutput" : "False",
     "quadrantVisualization" : "False",
