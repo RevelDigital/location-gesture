@@ -24,7 +24,6 @@ last_landmarks = False
 countdown = 0
 
 # a function that calculates distance between two points
-
 def distance(x1, y1, x2, y2):
     """
     calculates distance between two points
@@ -49,7 +48,6 @@ serial_output_test = True
 try:
     setup_file = json_to_dict('/home/pi/Desktop/location-gesture-main/SETUP.json') # needs to be full path for launching on boot
 
-    # ser.open()
     if(setup_file["serialOutput"] == "True"):
         print("Serial Output: ON")
         # opens serial port on default 9600,8,N,1 no timeout # Tutorial https://stackoverflow.com/questions/16701401/python-and-serial-how-to-send-a-message-and-receive-an-answer
@@ -85,14 +83,11 @@ try:
     crop_w = setup_file["camera_zone"]["w"]
     crop_h = setup_file["camera_zone"]["h"]
 
-    # while true
     while True:
         _, frame = cap.read()  # Read each frame from the webcam
         # Resize the frame to a smaller size based on x, y, width, height
         frame = frame[crop_y:crop_y+crop_h, crop_x:crop_x+crop_w]
         x, y, c = frame.shape
-        #dimensions = cap.shape
-        #width = cap.shape[1]
         width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         awid = width
         height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
@@ -132,12 +127,8 @@ try:
         result = hands.process(framergb)  # Get hand landmark prediction
         className = ''  # The predicted gesture
 
-        # test_fr=np.zeros(shape=[ht,wt,ch],dtype=np.uint8)
         frame = np.zeros((int(ahit), int(awid), 3), dtype=np.uint8)
         frame[:] = (255, 255, 255)
-        # # average x and y of hand
-        # avx, avy        = 0, 0                      #
-        # size = 0;
 
         # average x and y of palm
         avg_palm_x, avg_palm_y = 0, 0          #
@@ -179,9 +170,6 @@ try:
                     avx += lmx  # add x of landmark to the average x
                     avy += lmy  # add y of landmark to the average y
 
-                    # label each point with a number
-                    # cv2.putText(frame, str(index), (int(lmx*1.3), int(lmy*0.8)), cv2.FONT_HERSHEY_SIMPLEX, 0.25, (255, 255, 255), 1)
-                    # cv2.circle(frame, (int(lmx*1.3), int(lmy*0.8)),7, (19, 239, 239), 3)
                     # add the point to the landmarks list
                     landmarks.append([lmx, lmy])
 
@@ -214,6 +202,7 @@ try:
                     elif index == 20:
                         pinky_x[0], pinky_y[0] = lmx, lmy    # pinky base
                     index += 1
+
                 # get range of x and y, for use in calculating the hand's size
                 x_range = max(landmarks, key=lambda x: x[0])[
                     0]-min(landmarks, key=lambda x: x[0])[0]
@@ -241,7 +230,7 @@ try:
                     size_list.pop(0)
 
                 # setting a sensitivity for how much each finger is considered _R or not
-                sensitivity = 0.6
+                sensitivity = 0.6       # 0.6 is set by default
 
                 # index finger exists in the correct range to determine if the hand is in frame
                 if index_x[0] != 0:
@@ -397,8 +386,6 @@ try:
     # destroy all windows
     cv2.destroyAllWindows()
 
-    # Destroy all windows
-    cv2.destroyAllWindows()
 except serial.SerialException as e:
     print(str(e))
     time.sleep(3)
