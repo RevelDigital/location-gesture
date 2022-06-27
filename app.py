@@ -47,7 +47,7 @@ output_test = []
 serial_output_test = True
 
 try:
-    setup_file = json_to_dict('SETUP.json') # needs to be full path for launching on boot
+    setup_file = json_to_dict('/home/pi/Desktop/location-gesture-main/SETUP.json') # needs to be full path for launching on boot
 
     # ser.open()
     if(setup_file["serialOutput"] == "True"):
@@ -69,7 +69,7 @@ try:
     hands = mpHands.Hands(
         max_num_hands=1, min_detection_confidence=0.7)  # more hands
     mpDraw = mp.solutions.drawing_utils    # draw on the image
-    f = open('gesture.names', 'r')    # Load class names
+    f = open('/home/pi/Desktop/location-gesture-main/gesture.names', 'r')    # Load class names
     classNames = f.read().split('\n')
     f.close()
     which_webcam = 0  # which webcam to use 0 = main, 1 = secondary etc
