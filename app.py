@@ -257,45 +257,43 @@ try:
                         pinky_x[0], pinky_y[0], avg_palm_x, avg_palm_y)*sensitivity)
 
                 # print if fingers are raised or not
-                cv2.putText(frame, 'Thumb raised: ' + str(thumb_R),  (10, 10),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
-                if thumb_R == True:
-                    thumbR = 1
-                else:
-                    thumbR = 0
-                cv2.putText(frame, 'Index raised: ' + str(index_R),  (10, 30),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
-                if index_R == True:
-                    indexR = 1
-                else:
-                    indexR = 0
-                cv2.putText(frame, 'Middle raised: ' + str(middle_R), (10, 50),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
-                if middle_R == True:
-                    middleR = 1
-                else:
-                    middleR = 0
-                cv2.putText(frame, 'Ring raised: ' + str(ring_R),   (10, 70),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
-                if ring_R == True:
-                    ringR = 1
-                else:
-                    ringR = 0
-                cv2.putText(frame, 'Pinky raised: ' + str(pinky_R),  (10, 90),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
-                if pinky_R == True:
-                    pinkyR = 1
-                else:
-                    pinkyR = 0
+                if(setup_file["debugMode"] == "True"):
+                    cv2.putText(frame, 'Thumb raised: ' + str(thumb_R),  (10, 10),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+                    if thumb_R == True:
+                        thumbR = 1
+                    else:
+                        thumbR = 0
+                    cv2.putText(frame, 'Index raised: ' + str(index_R),  (10, 30),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+                    if index_R == True:
+                        indexR = 1
+                    else:
+                        indexR = 0
+                    cv2.putText(frame, 'Middle raised: ' + str(middle_R), (10, 50),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+                    if middle_R == True:
+                        middleR = 1
+                    else:
+                        middleR = 0
+                    cv2.putText(frame, 'Ring raised: ' + str(ring_R),   (10, 70),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+                    if ring_R == True:
+                        ringR = 1
+                    else:
+                        ringR = 0
+                    cv2.putText(frame, 'Pinky raised: ' + str(pinky_R),  (10, 90),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
+                    if pinky_R == True:
+                        pinkyR = 1
+                    else:
+                        pinkyR = 0
 
-                if index_R == False and middle_R == False and ring_R == False and pinky_R == False:
-                    isFist = True
-                else:
-                    isFist = False
+                    if index_R == False and middle_R == False and ring_R == False and pinky_R == False:
+                        isFist = True
+                    else:
+                        isFist = False
 
-                if(setup_file["crashChrisComputer"] == "True"):
-                    index = 0
-                    # Reset index, Drawing landmarks on frames
                 mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS, landmark_drawing_spec = mpDraw.DrawingSpec(color=(0, 255, 255), thickness=-1, circle_radius=5),connection_drawing_spec = mpDraw.DrawingSpec(color=(50, 50, 50), thickness=5, circle_radius=2))
 
                 # reset index
@@ -331,9 +329,10 @@ try:
             else:
                 quadrent = 0
 
-            # show the quadrent the hand is in
-            cv2.putText(frame, str(str(quadrent)+", "+str(avx)+", "+str(avy)+", " +
-                        str(isFist)), (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
+            if(setup_file["debugMode"] == "True"):
+                # show the quadrent the hand is in
+                cv2.putText(frame, str(str(quadrent)+", "+str(avx)+", "+str(avy)+", " +
+                            str(isFist)), (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
 
             output_string = 'gesture' + '|' + str(quadrent) + '|' + str(round(avx)) + '|' + str(round(avy)) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + '|' + str(indexR) + '|' + str(middleR) + '|' + str(ringR) + '|' + str(pinkyR) + '|' + str(isFist) + '|' + str(size) + '\n'
             output_test.append(output_string)
@@ -348,8 +347,10 @@ try:
                 if (index_x[0] != 0):
                     ser.write(bytes(output_string, encoding='utf8'))
                 canSend = False
-            # show hand size
-            cv2.putText(frame, 'size: ' + str(size),  (10, 25),cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
+
+            if(setup_file["debugMode"] == "True"):
+                # show hand size
+                cv2.putText(frame, 'size: ' + str(size),  (10, 25),cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
 
             if(setup_file["outputInTerminal"] == "True" and serial_output_test):
                 if  index_x[0] != 0 :
