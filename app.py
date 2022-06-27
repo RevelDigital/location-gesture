@@ -12,12 +12,10 @@ import numpy as np
 global canSend
 canSend = True
 
-
 def startLimit():
     global canSend
     canSend = True
     Timer(.1, startLimit).start()
-
 
 startLimit()
 
@@ -27,7 +25,6 @@ countdown = 0
 
 # a function that calculates distance between two points
 
-
 def distance(x1, y1, x2, y2):
     """
     calculates distance between two points
@@ -35,7 +32,6 @@ def distance(x1, y1, x2, y2):
     x2, y2: x and y coordinates of point 2
     """
     return ((x2 - x1)**2 + (y2 - y1)**2)**0.5  # calculate distance between two points
-
 
 def json_to_dict(filename):
     try:
@@ -51,13 +47,13 @@ output_test = []
 serial_output_test = True
 
 try:
-    setup_file = json_to_dict('SETUP.json')
+    setup_file = json_to_dict('/home/pi/Desktop/location-gesture-main/SETUP.json') # needs to be full path for launching on boot
 
     # ser.open()
     if(setup_file["serialOutput"] == "True"):
         print("Serial Output: ON")
         # opens serial port on default 9600,8,N,1 no timeout # Tutorial https://stackoverflow.com/questions/16701401/python-and-serial-how-to-send-a-message-and-receive-an-answer
-        ser = serial.Serial("/dev/ttyUSB0")
+        ser = serial.Serial("/dev/ttyS0")
         # prints the port that is really being used
         print("Serial port being used: " + str(ser.name))
     else:
@@ -73,8 +69,8 @@ try:
     hands = mpHands.Hands(
         max_num_hands=1, min_detection_confidence=0.7)  # more hands
     mpDraw = mp.solutions.drawing_utils    # draw on the image
-    f = open('gesture.names', 'r')    # Load class names
-    classNames = f.read().split('\n')          #
+    f = open('/home/pi/Desktop/location-gesture-main/gesture.names', 'r')    # Load class names
+    classNames = f.read().split('\n')
     f.close()
     which_webcam = 0  # which webcam to use 0 = main, 1 = secondary etc
     cap = cv2.VideoCapture(which_webcam, cv2.WND_PROP_FULLSCREEN)  # Initialize the webcam
@@ -347,7 +343,6 @@ try:
                     serial_output_test= False
                 else:
                     serial_output_test= True
-            
                     
             if(setup_file["serialOutput"] == "True" and canSend and serial_output_test):
                 if (index_x[0] != 0):
@@ -404,4 +399,5 @@ try:
     cv2.destroyAllWindows()
 except serial.SerialException as e:
     print(str(e))
+    time.sleep(3)
     os.system('sudo reboot now')
