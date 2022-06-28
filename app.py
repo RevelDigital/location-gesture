@@ -180,29 +180,29 @@ try:
                     # ring   :  tip = 16, base = 13
                     # pinky  :  tip = 20, base = 17
                     if index == 0:
-                        palm = [lmx, lmy]                      # palm
+                        palm = [lmx, lmy]                   # palm
                     elif index == 1:
-                        thumb_x[1], thumb_y[1] = lmx, lmy     # thumb tip
+                        thumb_x[1], thumb_y[1] = lmx, lmy   # thumb tip
                     elif index == 4:
-                        thumb_x[0], thumb_y[0] = lmx, lmy     # thumb base
+                        thumb_x[0], thumb_y[0] = lmx, lmy   # thumb base
                     elif index == 5:
-                        index_x[1], index_y[1] = lmx, lmy     # index tip
+                        index_x[1], index_y[1] = lmx, lmy   # index tip
                     elif index == 8:
-                        index_x[0], index_y[0] = lmx, lmy     # index base
+                        index_x[0], index_y[0] = lmx, lmy   # index base
                     elif index == 9:
-                        middle_x[1], middle_y[1] = lmx, lmy   # middle tip
+                        middle_x[1], middle_y[1] = lmx, lmy # middle tip
                     elif index == 12:
-                        middle_x[0], middle_y[0] = lmx, lmy  # middle base
+                        middle_x[0], middle_y[0] = lmx, lmy # middle base
                     elif index == 13:
-                        ring_x[1], ring_y[1] = lmx, lmy      # ring tip
+                        ring_x[1], ring_y[1] = lmx, lmy     # ring tip
                     elif index == 16:
-                        ring_x[0], ring_y[0] = lmx, lmy      # ring base
+                        ring_x[0], ring_y[0] = lmx, lmy     # ring base
                     elif index == 17:
-                        pinky_x[1], pinky_y[1] = lmx, lmy    # pinky tip
+                        pinky_x[1], pinky_y[1] = lmx, lmy   # pinky tip
                     elif index == 20:
-                        pinky_x[0], pinky_y[0] = lmx, lmy    # pinky base
+                        pinky_x[0], pinky_y[0] = lmx, lmy   # pinky base
                     index += 1
-
+                
                 # get range of x and y, for use in calculating the hand's size
                 x_range = max(landmarks, key=lambda x: x[0])[
                     0]-min(landmarks, key=lambda x: x[0])[0]
@@ -245,27 +245,12 @@ try:
                     pinky_R = (dist_hand < distance(
                         pinky_x[0], pinky_y[0], avg_palm_x, avg_palm_y)*sensitivity)
 
-                if thumb_R == True:
-                    thumbR = 1
-                else:
-                    thumbR = 0
-                if index_R == True:
-                    indexR = 1
-                else:
-                    indexR = 0
-                if middle_R == True:
-                    middleR = 1
-                else:
-                    middleR = 0
-                if ring_R == True:
-                    ringR = 1
-                else:
-                    ringR = 0
-                if pinky_R == True:
-                    pinkyR = 1
-                else:
-                    pinkyR = 0
-                
+                thumbR  = 1 if thumb_R  else 0
+                indexR  = 1 if index_R  else 0
+                middleR = 1 if middle_R else 0
+                ringR   = 1 if ring_R   else 0
+                pinkyR  = 1 if pinky_R  else 0
+
                 # print if fingers are raised or not
                 if(setup_file["debugMode"] == "True"):
                     cv2.putText(frame, 'Thumb raised: ' + str(thumb_R),  (10, 10),
@@ -279,10 +264,7 @@ try:
                     cv2.putText(frame, 'Pinky raised: ' + str(pinky_R),  (10, 90),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
                 
-                if index_R == False and middle_R == False and ring_R == False and pinky_R == False:
-                    isFist = True
-                else:
-                    isFist = False
+                isFist = True if(index_R==False and middle_R==False and ring_R==False and pinky_R==False)else False
 
                 mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS, landmark_drawing_spec = mpDraw.DrawingSpec(color=(0, 255, 255), thickness=-1, circle_radius=5),connection_drawing_spec = mpDraw.DrawingSpec(color=(50, 50, 50), thickness=5, circle_radius=2))
 
