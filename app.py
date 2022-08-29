@@ -31,7 +31,7 @@ def distance(x1, y1, x2, y2):
     x1, y1: x and y coordinates of point 1
     x2, y2: x and y coordinates of point 2
     """
-    return ((x2 - x1)**2 + (y2 - y1)**2)**0.5  # calculate distance between two points
+    return ((x2 - x1)**2 + (y2 - y1)**2)**0.5 # calculate distance between two points
 
 def json_to_dict(filename):
     try:
@@ -47,9 +47,11 @@ output_test = []
 serial_output_test = True
 
 try:
-    setup_file = json_to_dict('/home/pi/Desktop/location-gesture-main/SETUP.json') # needs to be full path for launching on boot
+    # needs to be full path for launching on boot
+    setup_file = json_to_dict(
+        '/home/pi/Desktop/location-gesture-main/SETUP.json')
 
-    if(setup_file["serialOutput"] == "True"):
+    if (setup_file["serialOutput"] == "True"):
         print("Serial Output: ON")
         # opens serial port on default 9600,8,N,1 no timeout # Tutorial https://stackoverflow.com/questions/16701401/python-and-serial-how-to-send-a-message-and-receive-an-answer
         ser = serial.Serial("/dev/ttyS0")
@@ -57,22 +59,24 @@ try:
         print("Serial port being used: " + str(ser.name))
     else:
         print("Serial Output: OFF")
-    if(setup_file["outputInTerminal"] == "True"):
+    if (setup_file["outputInTerminal"] == "True"):
         print("WILL Output in Terminal")
     else:
         print("WILL NOT Output in Terminal")
     print("Thumb up for ACTION")
 
     # initialize mediapipe
-    mpHands = mp.solutions.hands            # hands = mpHands(x1, y1, x2, y2)
+    mpHands = mp.solutions.hands # hands = mpHands(x1, y1, x2, y2)
     hands = mpHands.Hands(
-        max_num_hands=1, min_detection_confidence=0.7)  # more hands
+        max_num_hands=1, min_detection_confidence=0.7) # more hands
     mpDraw = mp.solutions.drawing_utils    # draw on the image
-    f = open('/home/pi/Desktop/location-gesture-main/gesture.names', 'r')    # load class names, needs to be full path for launching on boot
+    # load class names, needs to be full path for launching on boot
+    f = open('/home/pi/Desktop/location-gesture-main/gesture.names', 'r')
     classNames = f.read().split('\n')
     f.close()
     which_webcam = 0  # which webcam to use 0 = main, 1 = secondary etc
-    cap = cv2.VideoCapture(which_webcam, cv2.WND_PROP_FULLSCREEN)  # Initialize the webcam
+    # initialize the webcam
+    cap = cv2.VideoCapture(which_webcam, cv2.WND_PROP_FULLSCREEN)
     # average x and y coordinates of the hands. average x and y points
     avx_list, avy_list, size_list = [], [], []
     avx, avy, size = 0, 0, 0  # average x and y of hand
@@ -86,7 +90,7 @@ try:
 
     while True:
         _, frame = cap.read()  # Read each frame from the webcam
-        # Resize the frame to a smaller size based on x, y, width, height
+        # resize the frame to a smaller size based on x, y, width, height
         frame = frame[crop_y:crop_y+crop_h, crop_x:crop_x+crop_w]
         x, y, c = frame.shape
         width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
@@ -102,7 +106,7 @@ try:
         # last eighth of frame width
         last_eighth_width = int(width - first_eighth_width)
 
-        if(setup_file["quadrantVisualization"] == "True"):
+        if (setup_file["quadrantVisualization"] == "True"):
             cv2.line(img=frame, pt1=(first_quarter_width, 40), pt2=(first_quarter_width, int(
                 height-40)), color=(255, 0, 0), thickness=3, lineType=8, shift=0)
             cv2.line(img=frame, pt1=(last_quarter_width, 40), pt2=(last_quarter_width, int(
@@ -123,10 +127,10 @@ try:
         first_eighth_width = int(width/8)  # first eighth of frame width
         # last eighth of frame width
         last_eighth_width = int(width - first_eighth_width)
-        frame = cv2.flip(frame, 1)  # Flip the frame vertically
+        frame = cv2.flip(frame, 1)  # flip the frame vertically
         framergb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        result = hands.process(framergb)  # Get hand landmark prediction
-        className = ''  # The predicted gesture
+        result = hands.process(framergb)  # get hand landmark prediction
+        className = ''  # the predicted gesture
 
         frame = np.zeros((int(ahit), int(awid), 3), dtype=np.uint8)
         frame[:] = (255, 255, 255)
@@ -191,9 +195,9 @@ try:
                     elif index == 8:
                         index_x[0], index_y[0] = lmx, lmy   # index base
                     elif index == 9:
-                        middle_x[1], middle_y[1] = lmx, lmy # middle tip
+                        middle_x[1], middle_y[1] = lmx, lmy  # middle tip
                     elif index == 12:
-                        middle_x[0], middle_y[0] = lmx, lmy # middle base
+                        middle_x[0], middle_y[0] = lmx, lmy  # middle base
                     elif index == 13:
                         ring_x[1], ring_y[1] = lmx, lmy     # ring tip
                     elif index == 16:
@@ -203,7 +207,7 @@ try:
                     elif index == 20:
                         pinky_x[0], pinky_y[0] = lmx, lmy   # pinky base
                     index += 1
-                
+
                 # get range of x and y, for use in calculating the hand's size
                 x_range = max(landmarks, key=lambda x: x[0])[
                     0]-min(landmarks, key=lambda x: x[0])[0]
@@ -231,7 +235,7 @@ try:
                     size_list.pop(0)
 
                 # setting a sensitivity for how much each finger is considered _R or not
-                sensitivity = 0.6       # 0.6 is set by default
+                sensitivity = 0.6 # 0.6 is set by default
 
                 # index finger exists in the correct range to determine if the hand is in frame
                 if index_x[0] != 0:
@@ -246,14 +250,14 @@ try:
                     pinky_R = (dist_hand < distance(
                         pinky_x[0], pinky_y[0], avg_palm_x, avg_palm_y)*sensitivity)
 
-                thumbR  = 1 if thumb_R  else 0
-                indexR  = 1 if index_R  else 0
+                thumbR = 1 if thumb_R else 0
+                indexR = 1 if index_R else 0
                 middleR = 1 if middle_R else 0
-                ringR   = 1 if ring_R   else 0
-                pinkyR  = 1 if pinky_R  else 0
+                ringR = 1 if ring_R else 0
+                pinkyR = 1 if pinky_R else 0
 
                 # print if fingers are raised or not
-                if(setup_file["debugMode"] == "True"):
+                if (setup_file["debugMode"] == "True"):
                     cv2.putText(frame, 'Thumb raised: ' + str(thumb_R),  (10, 10),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
                     cv2.putText(frame, 'Index raised: ' + str(index_R),  (10, 30),
@@ -264,11 +268,13 @@ try:
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
                     cv2.putText(frame, 'Pinky raised: ' + str(pinky_R),  (10, 90),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255, 0, 0), 1)
-                
-                isFist = True if(index_R==False and middle_R==False and ring_R==False and pinky_R==False)else False
+
+                isFist = True if (index_R == False and middle_R ==
+                                  False and ring_R == False and pinky_R == False)else False
 
                 # hand shape/color/size for on-screen representation
-                mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS, landmark_drawing_spec = mpDraw.DrawingSpec(color=(255, 0, 0), thickness=-1, circle_radius=4),connection_drawing_spec = mpDraw.DrawingSpec(color=(50, 50, 50), thickness=3, circle_radius=2))
+                mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS, landmark_drawing_spec=mpDraw.DrawingSpec(color=(
+                    255, 0, 0), thickness=-1, circle_radius=4), connection_drawing_spec=mpDraw.DrawingSpec(color=(50, 50, 50), thickness=3, circle_radius=2))
 
                 # reset index
                 index = 0
@@ -291,45 +297,48 @@ try:
                 not ring_R) and (not pinky_R)
 
             # check which quadrant the avg palm is
-            if(avg_palm_x > 0 and avg_palm_x < first_eighth_width):
+            if (avg_palm_x > 0 and avg_palm_x < first_eighth_width):
                 quadrant = 1
-            elif(avg_palm_x > first_eighth_width and avg_palm_x < first_quarter_width):
+            elif (avg_palm_x > first_eighth_width and avg_palm_x < first_quarter_width):
                 quadrant = 2
-            elif(avg_palm_x > first_quarter_width and avg_palm_x < last_quarter_width):
+            elif (avg_palm_x > first_quarter_width and avg_palm_x < last_quarter_width):
                 quadrant = 3
-            elif(avg_palm_x > last_quarter_width and avg_palm_x < last_eighth_width):
+            elif (avg_palm_x > last_quarter_width and avg_palm_x < last_eighth_width):
                 quadrant = 4
-            elif(avg_palm_x > last_eighth_width):
+            elif (avg_palm_x > last_eighth_width):
                 quadrant = 5
             else:
                 quadrant = 0
 
-            if(setup_file["debugMode"] == "True"):
+            if (setup_file["debugMode"] == "True"):
                 # show the quadrant the hand is in
                 cv2.putText(frame, str(str(quadrant)+", "+str(avx)+", "+str(avy)+", " +
                             str(isFist)), (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
 
-            output_string = 'gesture' + '|' + str(quadrant) + '|' + str(round(avx)) + '|' + str(round(avy)) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + '|' + str(indexR) + '|' + str(middleR) + '|' + str(ringR) + '|' + str(pinkyR) + '|' + str(isFist) + '|' + str(size) + '\n'
+            output_string = 'gesture' + '|' + str(quadrant) + '|' + str(round(avx)) + '|' + str(round(avy)) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + '|' + str(
+                round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + '|' + str(indexR) + '|' + str(middleR) + '|' + str(ringR) + '|' + str(pinkyR) + '|' + str(isFist) + '|' + str(size) + '\n'
             output_test.append(output_string)
-            if len(output_test)>6:
+            if len(output_test) > 6:
                 output_test.pop(0)
                 if len(set(output_test)) == 1:
-                    serial_output_test= False
+                    serial_output_test = False
                 else:
-                    serial_output_test= True
-                    
-            if(setup_file["serialOutput"] == "True" and canSend and serial_output_test):
+                    serial_output_test = True
+
+            if (setup_file["serialOutput"] == "True" and canSend and serial_output_test):
                 if (index_x[0] != 0):
                     ser.write(bytes(output_string, encoding='utf8'))
                 canSend = False
 
-            if(setup_file["debugMode"] == "True"):
+            if (setup_file["debugMode"] == "True"):
                 # show hand size
-                cv2.putText(frame, 'size: ' + str(size),  (10, 25),cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
+                cv2.putText(frame, 'size: ' + str(size),  (10, 25),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
 
-            if(setup_file["outputInTerminal"] == "True" and serial_output_test):
-                if  index_x[0] != 0 :
-                    print(output_string)  # (quadrant, x-coord of hand, y-coord of hand, camera res width, camera res height, index finger _R, middle finger _R, ring finger _R, pinky finger _R, is fist?, hand size)
+            if (setup_file["outputInTerminal"] == "True" and serial_output_test):
+                if index_x[0] != 0:
+                    # (quadrant, x-coord of hand, y-coord of hand, camera res width, camera res height, index finger _R, middle finger _R, ring finger _R, pinky finger _R, is fist?, hand size)
+                    print(output_string)
 
             # uncomment for hand-mouse control
             # if(setup_file["mouseControl"] == "True"):
@@ -352,14 +361,15 @@ try:
             #             mouse.press('left')
             #             print("pressed")
 
-        #Show the final output
+        # show the final output
         cv2.namedWindow("Output", cv2.WND_PROP_FULLSCREEN)
-        cv2.setWindowProperty("Output", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-        if(setup_file["videoFeedPortrait"] == "True"):
+        cv2.setWindowProperty(
+            "Output", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        if (setup_file["videoFeedPortrait"] == "True"):
             frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
         cv2.imshow("Output", frame)
 
-        # Press q to quit
+        # press q to quit
         if cv2.waitKey(1) == ord('q'):
             if setup_file["serialOutput"] == "True":
                 ser.close()
@@ -371,6 +381,7 @@ try:
     # destroy all windows
     cv2.destroyAllWindows()
 
+# on serial error, reboot
 except serial.SerialException as e:
     print(str(e))
     time.sleep(3)
