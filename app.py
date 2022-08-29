@@ -1,7 +1,8 @@
 # import the necessary packages
 import cv2
 import time
-import mouse
+# uncomment for use in hand-mouse control
+# import mouse
 import mediapipe as mp
 import serial
 import json
@@ -67,7 +68,7 @@ try:
     hands = mpHands.Hands(
         max_num_hands=1, min_detection_confidence=0.7)  # more hands
     mpDraw = mp.solutions.drawing_utils    # draw on the image
-    f = open('/home/pi/Desktop/location-gesture-main/gesture.names', 'r')    # Load class names
+    f = open('/home/pi/Desktop/location-gesture-main/gesture.names', 'r')    # load class names, needs to be full path for launching on boot
     classNames = f.read().split('\n')
     f.close()
     which_webcam = 0  # which webcam to use 0 = main, 1 = secondary etc
@@ -266,7 +267,8 @@ try:
                 
                 isFist = True if(index_R==False and middle_R==False and ring_R==False and pinky_R==False)else False
 
-                mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS, landmark_drawing_spec = mpDraw.DrawingSpec(color=(0, 255, 255), thickness=-1, circle_radius=5),connection_drawing_spec = mpDraw.DrawingSpec(color=(50, 50, 50), thickness=5, circle_radius=2))
+                # hand shape/color/size for on-screen representation
+                mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS, landmark_drawing_spec = mpDraw.DrawingSpec(color=(255, 0, 0), thickness=-1, circle_radius=4),connection_drawing_spec = mpDraw.DrawingSpec(color=(50, 50, 50), thickness=3, circle_radius=2))
 
                 # reset index
                 index = 0
@@ -278,10 +280,11 @@ try:
         # if the hand is in the frame
         if len(avx_list) > 1:
 
-            if(setup_file["mouseControl"] == "True"):
-                # move mouse to the center of the palm
-                mouse.move(int((avg_palm_x-200)*8-400),
-                           int((avg_palm_y-200)*4-400))
+            # uncomment for hand-mouse control
+            # if(setup_file["mouseControl"] == "True"):
+            #     # move mouse to the center of the palm
+            #     mouse.move(int((avg_palm_x-200)*8-400),
+            #                int((avg_palm_y-200)*4-400))
 
             # is the hand in a held position?
             isHeld = (not index_R) and (not middle_R) and (
@@ -328,26 +331,26 @@ try:
                 if  index_x[0] != 0 :
                     print(output_string)  # (quadrant, x-coord of hand, y-coord of hand, camera res width, camera res height, index finger _R, middle finger _R, ring finger _R, pinky finger _R, is fist?, hand size)
 
-            # if the hand is not held
-            if(setup_file["mouseControl"] == "True"):
-                if not isHeld:
-                    if mouse.is_pressed('left'):
-                        mouse.release('left')
-                        print("released")
-                    elif not index_R:
-                        mouse.click('left')
-                        print("clicked")
-                        time.sleep(0.25)
-                    elif not pinky_R:
-                        mouse.click('right')
-                        print("right clicked")
-                        time.sleep(0.3)
+            # uncomment for hand-mouse control
+            # if(setup_file["mouseControl"] == "True"):
+            #     if not isHeld:
+            #         if mouse.is_pressed('left'):
+            #             mouse.release('left')
+            #             print("released")
+            #         elif not index_R:
+            #             mouse.click('left')
+            #             print("clicked")
+            #             time.sleep(0.25)
+            #         elif not pinky_R:
+            #             mouse.click('right')
+            #             print("right clicked")
+            #             time.sleep(0.3)
 
-                # if the hand is held
-                if isHeld:
-                    if not mouse.is_pressed('left'):
-                        mouse.press('left')
-                        print("pressed")
+            #     # if the hand is held
+            #     if isHeld:
+            #         if not mouse.is_pressed('left'):
+            #             mouse.press('left')
+            #             print("pressed")
 
         #Show the final output
         cv2.namedWindow("Output", cv2.WND_PROP_FULLSCREEN)
