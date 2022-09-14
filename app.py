@@ -1,8 +1,6 @@
 # import the necessary packages
 import cv2
 import time
-# uncomment for use in hand-mouse control
-# import mouse
 import mediapipe as mp
 import serial
 import json
@@ -13,10 +11,12 @@ import numpy as np
 global canSend
 canSend = True
 
+
 def startLimit():
     global canSend
     canSend = True
     Timer(.1, startLimit).start()
+
 
 startLimit()
 
@@ -25,13 +25,16 @@ last_landmarks = False
 countdown = 0
 
 # a function that calculates distance between two points
+
+
 def distance(x1, y1, x2, y2):
     """
     calculates distance between two points
     x1, y1: x and y coordinates of point 1
     x2, y2: x and y coordinates of point 2
     """
-    return ((x2 - x1)**2 + (y2 - y1)**2)**0.5 # calculate distance between two points
+    return ((x2 - x1)**2 + (y2 - y1)**2)**0.5  # calculate distance between two points
+
 
 def json_to_dict(filename):
     try:
@@ -43,13 +46,14 @@ def json_to_dict(filename):
         print("Error: file not found")
         quit()
 
+
 output_test = []
 serial_output_test = True
 
 try:
     # needs to be full path for launching on boot
     setup_file = json_to_dict(
-        '/home/pi/Desktop/location-gesture-main/SETUP.json')
+        'C:/Users/revel/Desktop/location-gesture-piSpecific/SETUP.json')
 
     if (setup_file["serialOutput"] == "True"):
         print("Serial Output: ON")
@@ -66,17 +70,19 @@ try:
     print("Thumb up for ACTION")
 
     # initialize mediapipe
-    mpHands = mp.solutions.hands # hands = mpHands(x1, y1, x2, y2)
+    mpHands = mp.solutions.hands            # hands = mpHands(x1, y1, x2, y2)
     hands = mpHands.Hands(
-        max_num_hands=1, min_detection_confidence=0.7) # more hands
+        max_num_hands=1, min_detection_confidence=0.7)  # more hands
     mpDraw = mp.solutions.drawing_utils    # draw on the image
-    # load class names, needs to be full path for launching on boot
-    f = open('/home/pi/Desktop/location-gesture-main/gesture.names', 'r')
-    classNames = f.read().split('\n')
+    # Load class names
+    f = open('C:/Users/revel/Desktop/location-gesture-piSpecific/gesture.names', 'r')
+    classNames = f.read().split('/n')
     f.close()
     which_webcam = 0  # which webcam to use 0 = main, 1 = secondary etc
-    # initialize the webcam
+    # Initialize the webcam
     cap = cv2.VideoCapture(which_webcam, cv2.WND_PROP_FULLSCREEN)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
     # average x and y coordinates of the hands. average x and y points
     avx_list, avy_list, size_list = [], [], []
     avx, avy, size = 0, 0, 0  # average x and y of hand
@@ -90,7 +96,7 @@ try:
 
     while True:
         _, frame = cap.read()  # Read each frame from the webcam
-        # resize the frame to a smaller size based on x, y, width, height
+        # Resize the frame to a smaller size based on x, y, width, height
         frame = frame[crop_y:crop_y+crop_h, crop_x:crop_x+crop_w]
         x, y, c = frame.shape
         width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
@@ -127,13 +133,13 @@ try:
         first_eighth_width = int(width/8)  # first eighth of frame width
         # last eighth of frame width
         last_eighth_width = int(width - first_eighth_width)
-        frame = cv2.flip(frame, 1)  # flip the frame vertically
+        frame = cv2.flip(frame, 1)  # Flip the frame vertically
         framergb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        result = hands.process(framergb)  # get hand landmark prediction
-        className = ''  # the predicted gesture
+        result = hands.process(framergb)  # Get hand landmark prediction
+        className = ''  # The predicted gesture
 
         frame = np.zeros((int(ahit), int(awid), 3), dtype=np.uint8)
-        frame[:] = (255, 255, 255)
+        frame[:] = (0, 0, 0)
 
         # average x and y of palm
         avg_palm_x, avg_palm_y = 0, 0
@@ -235,7 +241,7 @@ try:
                     size_list.pop(0)
 
                 # setting a sensitivity for how much each finger is considered _R or not
-                sensitivity = 0.6 # 0.6 is set by default
+                sensitivity = 0.6       # 0.6 is set by default
 
                 # index finger exists in the correct range to determine if the hand is in frame
                 if index_x[0] != 0:
@@ -272,9 +278,9 @@ try:
                 isFist = True if (index_R == False and middle_R ==
                                   False and ring_R == False and pinky_R == False)else False
 
-                # hand shape/color/size for on-screen representation
+                # size/shape/color of hand/joint represantation
                 mpDraw.draw_landmarks(frame, handslms, mpHands.HAND_CONNECTIONS, landmark_drawing_spec=mpDraw.DrawingSpec(color=(
-                    255, 0, 0), thickness=-1, circle_radius=4), connection_drawing_spec=mpDraw.DrawingSpec(color=(50, 50, 50), thickness=3, circle_radius=2))
+                    255, 0, 0), thickness=-1, circle_radius=4), connection_drawing_spec=mpDraw.DrawingSpec(color=(50, 50, 50), thickness=4, circle_radius=4))
 
                 # reset index
                 index = 0
@@ -285,12 +291,6 @@ try:
 
         # if the hand is in the frame
         if len(avx_list) > 1:
-
-            # uncomment for hand-mouse control
-            # if(setup_file["mouseControl"] == "True"):
-            #     # move mouse to the center of the palm
-            #     mouse.move(int((avg_palm_x-200)*8-400),
-            #                int((avg_palm_y-200)*4-400))
 
             # is the hand in a held position?
             isHeld = (not index_R) and (not middle_R) and (
@@ -332,7 +332,7 @@ try:
 
             if (setup_file["debugMode"] == "True"):
                 # show hand size
-                cv2.putText(frame, 'size: ' + str(size),  (10, 25),
+                cv2.putText(frame, 'size: ' + str(size),  (140, 25),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
 
             if (setup_file["outputInTerminal"] == "True" and serial_output_test):
@@ -340,28 +340,7 @@ try:
                     # (quadrant, x-coord of hand, y-coord of hand, camera res width, camera res height, index finger _R, middle finger _R, ring finger _R, pinky finger _R, is fist?, hand size)
                     print(output_string)
 
-            # uncomment for hand-mouse control
-            # if(setup_file["mouseControl"] == "True"):
-            #     if not isHeld:
-            #         if mouse.is_pressed('left'):
-            #             mouse.release('left')
-            #             print("released")
-            #         elif not index_R:
-            #             mouse.click('left')
-            #             print("clicked")
-            #             time.sleep(0.25)
-            #         elif not pinky_R:
-            #             mouse.click('right')
-            #             print("right clicked")
-            #             time.sleep(0.3)
-
-            #     # if the hand is held
-            #     if isHeld:
-            #         if not mouse.is_pressed('left'):
-            #             mouse.press('left')
-            #             print("pressed")
-
-        # show the final output
+        # Show the final output
         cv2.namedWindow("Output", cv2.WND_PROP_FULLSCREEN)
         cv2.setWindowProperty(
             "Output", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
@@ -369,7 +348,7 @@ try:
             frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
         cv2.imshow("Output", frame)
 
-        # press q to quit
+        # Press q to quit
         if cv2.waitKey(1) == ord('q'):
             if setup_file["serialOutput"] == "True":
                 ser.close()
@@ -381,8 +360,5 @@ try:
     # destroy all windows
     cv2.destroyAllWindows()
 
-# on serial error, reboot
 except serial.SerialException as e:
     print(str(e))
-    time.sleep(3)
-    os.system('sudo reboot now')
