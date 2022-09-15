@@ -1,10 +1,8 @@
 {
     "mouseControl" : "False",
     "swipeControl" : "False",
-    "portLocation" : "/dev/ttyS0",
-    "serialOutput" : "False",
     "quadrantVisualization" : "False",
-    "outputInTerminal" : "True",
+    "outputInTerminal" : "False",
     "debugMode" : "False",
     "videoFeedPortrait" : "False",
     "camera_zone":{
