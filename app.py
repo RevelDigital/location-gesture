@@ -1,22 +1,32 @@
 # import the necessary packages
+from distutils.log import error
+import errno
+from msilib.schema import Error
+from socket import socket
 import cv2
 import time
 import mediapipe as mp
-import serial
 import json
 from threading import Timer
 import os
+import pickle
 import numpy as np
+import base64 as b64  # Base64 encoding
+import zmq
 
+TCP_IP      = 'localhost'   # Where to host
+TCP_PORT    = 5550          # Port of where to host messaging
+TCP_PORT_VID= 5555          # Port of where to host video stream
+context = zmq.Context()
+footage_socket = context.socket(zmq.PUB)
+footage_socket.connect(('tcp://'+TCP_IP+':'+str(TCP_PORT_VID)))
 global canSend
 canSend = True
-
 
 def startLimit():
     global canSend
     canSend = True
     Timer(.1, startLimit).start()
-
 
 startLimit()
 
@@ -26,7 +36,6 @@ countdown = 0
 
 # a function that calculates distance between two points
 
-
 def distance(x1, y1, x2, y2):
     """
     calculates distance between two points
@@ -34,7 +43,6 @@ def distance(x1, y1, x2, y2):
     x2, y2: x and y coordinates of point 2
     """
     return ((x2 - x1)**2 + (y2 - y1)**2)**0.5  # calculate distance between two points
-
 
 def json_to_dict(filename):
     try:
@@ -46,28 +54,16 @@ def json_to_dict(filename):
         print("Error: file not found")
         quit()
 
-
 output_test = []
-serial_output_test = True
 
 try:
     # needs to be full path for launching on boot
-    setup_file = json_to_dict(
-        'C:/Users/revel/Desktop/location-gesture-piSpecific/SETUP.json')
+    setup_file = json_to_dict('SETUP.json')
 
-    if (setup_file["serialOutput"] == "True"):
-        print("Serial Output: ON")
-        # opens serial port on default 9600,8,N,1 no timeout # Tutorial https://stackoverflow.com/questions/16701401/python-and-serial-how-to-send-a-message-and-receive-an-answer
-        ser = serial.Serial("/dev/ttyS0")
-        # prints the port that is really being used
-        print("Serial port being used: " + str(ser.name))
-    else:
-        print("Serial Output: OFF")
     if (setup_file["outputInTerminal"] == "True"):
         print("WILL Output in Terminal")
     else:
         print("WILL NOT Output in Terminal")
-    print("Thumb up for ACTION")
 
     # initialize mediapipe
     mpHands = mp.solutions.hands            # hands = mpHands(x1, y1, x2, y2)
@@ -75,7 +71,7 @@ try:
         max_num_hands=1, min_detection_confidence=0.7)  # more hands
     mpDraw = mp.solutions.drawing_utils    # draw on the image
     # Load class names
-    f = open('C:/Users/revel/Desktop/location-gesture-piSpecific/gesture.names', 'r')
+    f = open('gesture.names', 'r')
     classNames = f.read().split('/n')
     f.close()
     which_webcam = 0  # which webcam to use 0 = main, 1 = secondary etc
@@ -320,38 +316,33 @@ try:
             output_test.append(output_string)
             if len(output_test) > 6:
                 output_test.pop(0)
-                if len(set(output_test)) == 1:
-                    serial_output_test = False
-                else:
-                    serial_output_test = True
 
-            if (setup_file["serialOutput"] == "True" and canSend and serial_output_test):
-                if (index_x[0] != 0):
-                    ser.write(bytes(output_string, encoding='utf8'))
-                canSend = False
+            # if (canSend):
+            #     if (index_x[0] != 0):
+            #         socket.write(bytes(output_string, encoding='utf8'))
+            #     canSend = False
 
             if (setup_file["debugMode"] == "True"):
                 # show hand size
                 cv2.putText(frame, 'size: ' + str(size),  (140, 25),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1)
 
-            if (setup_file["outputInTerminal"] == "True" and serial_output_test):
+            if (setup_file["outputInTerminal"] == "True"):
                 if index_x[0] != 0:
                     # (quadrant, x-coord of hand, y-coord of hand, camera res width, camera res height, index finger _R, middle finger _R, ring finger _R, pinky finger _R, is fist?, hand size)
                     print(output_string)
-
-        # Show the final output
-        cv2.namedWindow("Output", cv2.WND_PROP_FULLSCREEN)
-        cv2.setWindowProperty(
-            "Output", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-        if (setup_file["videoFeedPortrait"] == "True"):
-            frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
-        cv2.imshow("Output", frame)
+       
+        BUFFERSIZE  = 1024
+        
+        strm_vid = True
+        
+        if strm_vid:                               # Send video via tcp
+            encoded, buffer = cv2.imencode('.jpg', frame)
+            jpg_as_text = b64.b64encode(buffer)
+            footage_socket.send(jpg_as_text)
 
         # Press q to quit
         if cv2.waitKey(1) == ord('q'):
-            if setup_file["serialOutput"] == "True":
-                ser.close()
             break
 
     # release the webcam and destroy all active windows
@@ -359,6 +350,6 @@ try:
 
     # destroy all windows
     cv2.destroyAllWindows()
-
-except serial.SerialException as e:
-    print(str(e))
+    
+except Error:
+    print(Error.message())
