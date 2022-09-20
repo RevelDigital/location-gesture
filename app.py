@@ -1,25 +1,70 @@
 # import the necessary packages
-from distutils.log import error
 import errno
-from msilib.schema import Error
+import asyncio
+
 from socket import socket
 import cv2
 import time
 import mediapipe as mp
 import json
 from threading import Timer
-import os
-import pickle
 import numpy as np
 import base64 as b64  # Base64 encoding
 import zmq
+from distutils.log import error
+from msilib.schema import Error
+import threading, time
 
+from websocket_server import WebsocketServer
+
+
+# Called for every client connecting (after handshake)
+def new_client(client, server):
+    print("New client connected and was given id %d" % client['id'])
+    server.send_message_to_all("Hey all, a new client has joined us")
+
+
+# Called for every client disconnecting
+def client_left(client, other):
+    print("Client(%d) disconnected" % client['id'])
+
+
+# Called when a client sends a message
+def message_received(client, server, message):
+    if len(message) > 200:
+        message = message[:200] + '..'
+    server.send_message_to_all("Echo "+message)
+    print("Client(%d) said: %s" % (client['id'], message))
+
+
+PORT = 9001
+server = WebsocketServer(port=PORT)
+server.set_fn_new_client(new_client)
+server.set_fn_client_left(client_left)
+server.set_fn_message_received(message_received)
+# server.run_forever()
+
+
+
+
+class DoWork(threading.Thread):
+    def __init__(self, shared, *args, **kwargs):
+        super(DoWork,self).__init__(*args, **kwargs)
+        self.shared = shared
+
+    def run(self):
+        self.shared.run_forever()
+
+
+t = DoWork(shared=server, name='a')
+t.start()
 TCP_IP      = 'localhost'   # Where to host
 TCP_PORT    = 5550          # Port of where to host messaging
 TCP_PORT_VID= 5555          # Port of where to host video stream
 context = zmq.Context()
 footage_socket = context.socket(zmq.PUB)
 footage_socket.connect(('tcp://'+TCP_IP+':'+str(TCP_PORT_VID)))
+
 global canSend
 canSend = True
 
@@ -287,7 +332,6 @@ try:
 
         # if the hand is in the frame
         if len(avx_list) > 1:
-
             # is the hand in a held position?
             isHeld = (not index_R) and (not middle_R) and (
                 not ring_R) and (not pinky_R)
@@ -311,17 +355,16 @@ try:
                 cv2.putText(frame, str(str(quadrant)+", "+str(avx)+", "+str(avy)+", " +
                             str(isFist)), (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 1)
 
-            output_string = 'gesture' + '|' + str(quadrant) + '|' + str(round(avx)) + '|' + str(round(avy)) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + '|' + str(
+            output_string_term = 'gesture' + '|' + str(quadrant) + '|' + str(round(avx)) + '|' + str(round(avy)) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + '|' + str(
                 round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + '|' + str(indexR) + '|' + str(middleR) + '|' + str(ringR) + '|' + str(pinkyR) + '|' + str(isFist) + '|' + str(size) + '\n'
+
+            output_string = b64.b64encode(bytes('gesture' + '|' + str(quadrant) + '|' + str(round(avx)) + '|' + str(round(avy)) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + '|' + str(
+                round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + '|' + str(indexR) + '|' + str(middleR) + '|' + str(ringR) + '|' + str(pinkyR) + '|' + str(isFist) + '|' + str(size) + '\n', encoding="utf8"))
             output_test.append(output_string)
             if len(output_test) > 6:
                 output_test.pop(0)
-
-            # if (canSend):
-            #     if (index_x[0] != 0):
-            #         socket.write(bytes(output_string, encoding='utf8'))
-            #     canSend = False
-
+            
+        
             if (setup_file["debugMode"] == "True"):
                 # show hand size
                 cv2.putText(frame, 'size: ' + str(size),  (140, 25),
@@ -330,7 +373,16 @@ try:
             if (setup_file["outputInTerminal"] == "True"):
                 if index_x[0] != 0:
                     # (quadrant, x-coord of hand, y-coord of hand, camera res width, camera res height, index finger _R, middle finger _R, ring finger _R, pinky finger _R, is fist?, hand size)
-                    print(output_string)
+                    print(output_string_term)
+            if len(avx_list)>7:
+                if avx_list[0]==avx_list[1] and avx_list[1]==avx_list[2] and avx_list[2]==avx_list[3] and avx_list[3]==avx_list[4] and avx_list[5]==avx_list[4] and avx_list[5]==avx_list[6]:
+                    frame = np.zeros((int(ahit), int(awid), 3), dtype=np.uint8)
+                    frame[:] = (0, 0, 0)
+                else:
+                    output_string = 'gesture' + '|' + str(round(avx)) + '|' + str(round(avy)) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_WIDTH))) + '|' + str(round(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))) + '|' + str(indexR) + '|' + str(middleR) + '|' + str(ringR) + '|' + str(pinkyR) + '|' + str(isFist) + '|' + str(size)
+                    server.send_message_to_all(output_string)
+
+
        
         BUFFERSIZE  = 1024
         
@@ -351,5 +403,5 @@ try:
     # destroy all windows
     cv2.destroyAllWindows()
     
-except Error:
-    print(Error.message())
+except BaseException as b:
+    print(b)
